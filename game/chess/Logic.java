@@ -1,9 +1,27 @@
 package game.chess;
 
 import java.lang.IndexOutOfBoundsException;
+import java.util.ArrayList;
+
 public class Logic 
 {
     private static final int SIZE = 8;
+    
+    
+    /**
+     * 
+     * @author Areeb Emran
+     * 
+     * Types of moves
+     */
+    public enum Type 
+    {
+    	MOVE,
+    	EN_PASSENT,
+    	SIMPLE_CAPTURE,
+    	CASTLE,
+    	TRANSFORM	
+    }
     
     /**
      * 
@@ -65,9 +83,9 @@ public class Logic
      */
     private class Piece 
     {   
-        public PieceType type;
+        private PieceType type;
         public final PieceColor color; 
-        public boolean hasMoved; 
+        private boolean hasMoved; 
         
         /**
          * A constructor for the piece.
@@ -254,7 +272,7 @@ public class Logic
      * @param coord 	The string coordinate, like a7.
      * @return	the exact board positions in the order {row, col}
      * 
-     * @throws IndexOutOfBoundsException 	when the letters wouldn't match ccorrect input (ex. n, j, 9, and 0 don't work.)
+     * @throws IndexOutOfBoundsException 	when the letters wouldn't match correct input (ex. n, j, 9, and 0 don't work.)
      */
     public static int[] toCoordinates(String coord) throws IndexOutOfBoundsException
     {
@@ -276,9 +294,16 @@ public class Logic
      * @param row its row on the board.
      * @return The piece at that point.
      */
-    private Piece getPiece(int col, int row)
+    private Piece getPiece(int col, int row) 
     {
-        return board[row][col];
+    	try 
+    	{
+            return board[row][col];
+    	}
+    	catch (IndexOutOfBoundsException ioobe)
+    	{
+    		return null;
+    	}
     }
     
     /**
@@ -292,4 +317,206 @@ public class Logic
     {
         board[row][col] = piece;
     }
+    
+    /**
+     * A method for getting all possible moves a piece can go to.
+     * 
+     * @param currentCoord
+     * 
+     * @return all possible coordinates the piece can go to.
+     */
+    public ArrayList<String[]> getAllPossibilities(String currentCoord)
+    {
+    	int row = -1;
+    	int col = -1;
+    	try 
+    	{
+    		int[] boardCoord = this.toCoordinates(currentCoord);
+    		row = boardCoord[0];
+    		col = boardCoord[1];
+    	}
+    	catch (IndexOutOfBoundsException ioobe)
+    	{
+    		System.out.println("no possible moves");
+    		return null;
+    	}
+    	
+    	Piece p = this.getPiece(col, row);
+    	ArrayList<String[]> moves = new ArrayList<>();
+    	switch (p.getPieceType())
+    	{
+    		case PAWN:
+    			getPawnMoves(moves, p.hasMovedAlready(), p.getColor(), row, col);
+    			break;
+    		case ROOK:
+    			getRookMoves(moves, p.hasMovedAlready(), p.getColor(), row, col);
+    			break;
+    		case BISHOP:
+    			getBishopMoves(moves, p.getColor(), row, col);
+    			break;
+    		case KNIGHT:
+    			getKnightMoves(moves, p.getColor(), row, col);
+    			break;
+    		case QUEEN:
+    			getQueenMoves(moves, p.getColor(), row, col);
+    			break;
+    		case KING: 
+    			getKingMoves(moves, p.hasMovedAlready(), p.getColor(), row, col);
+    			break;
+    		
+    	}
+		return moves;
+    }
+
+	private void getKingMoves(
+			ArrayList<String[]> moves,
+			boolean hasMovedAlready, 
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	private void getQueenMoves(
+			ArrayList<String[]> moves,
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	private void getKnightMoves(
+			ArrayList<String[]> moves,
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	private void getBishopMoves(
+			ArrayList<String[]> moves,
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	private void getRookMoves(
+			ArrayList<String[]> moves,
+			boolean hasMovedAlready, 
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	
+	private void getPawnMoves(
+			ArrayList<String[]> moves,
+			boolean hasMovedAlready, 
+			PieceColor color, 
+			int row, 
+			int col) 
+	{
+		int oneTileMove = 1;
+		int twoTileMove = 2;
+		if (color.equals(PieceColor.BLACK))
+		{
+			oneTileMove *= -1;
+			twoTileMove *= -1;
+		}
+		
+		// 1 forward
+		if (getPiece(col, row + oneTileMove) == null)
+		{
+			moves.add(new String[]{Logic.toCoordinates(col, row + oneTileMove), null});
+		}
+		
+		// 2 forward
+		if (!hasMovedAlready 
+				&& getPiece(col, row + 2 * oneTileMove) == null)
+		{
+			moves.add(new String[] {Logic.toCoordinates(col, row + 2 * oneTileMove), null});
+		}
+		
+		// corner attacks
+		Piece leftUp = getPiece(col - oneTileMove, row + oneTileMove);
+		if (leftUp != null 
+				&& !leftUp.getColor().equals(color))
+		{
+			String coord = Logic.toCoordinates(col - oneTileMove, row + oneTileMove);
+			moves.add(new String[] {coord, coord});
+		}
+		
+		Piece rightUp = getPiece(col);
+	}
+    
+	/**
+	 * See if a move can be made. 
+	 * 
+	 * @param typeOfMove
+	 * @param row
+	 * @param col
+	 * @param color
+	 * @return
+	 */
+	private boolean canMakeMove (
+			Type typeOfMove, 
+			int row, 
+			int col, 
+			PieceColor color)
+	{
+		switch (typeOfMove)
+		{
+			case MOVE:
+				if (getPiece(col, row) == null && Logic.withinRange(row, col))
+				{
+					return true;
+				}
+				break;
+			case EN_PASSENT:
+				
+				break;
+			case SIMPLE_CAPTURE:
+				
+				break;
+			case CASTLE:
+				
+				break;
+			case TRANSFORM:
+				
+				break;
+		}
+		return false;
+	}
+	/*
+	 *  public enum Type 
+    {
+    	MOVE,
+    	EN_PASSENT,
+    	SIMPLE_CAPTURE,
+    	CASTLE,
+    	TRANSFORM	
+    }
+	 */
+	
+	
+	/**
+	 * Do a test to see if a row and column is in the right range.
+	 * 
+	 * @param positionOne
+	 * @param positionTwo
+	 * @return
+	 */
+	public static boolean withinRange(int positionOne, int positionTwo)
+	{
+		return positionOne >= 0 && positionOne < SIZE
+				&& positionTwo >= 0 && positionTwo < SIZE;
+	}
+    
 }
