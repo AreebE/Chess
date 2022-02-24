@@ -23,140 +23,8 @@ public class Logic
     	TRANSFORM	
     }
     
-    /**
-     * 
-     * @author Areeb Emran
-     * 
-     * The piece colors: only black and white
-     */
-    public enum PieceColor 
-    {
-        WHITE,
-        BLACK
-    }
-
-    /**
-     * 
-     * @author Areeb Emran
-     *
-     * Piece types to help define values.
-     */
-    public enum PieceType
-    {
-        PAWN(1),
-        ROOK(3),
-        KNIGHT(3),
-        BISHOP(5),
-        QUEEN(9),
-        KING(Integer.MAX_VALUE);
-
-        private final int value;
-
-        /**
-         * Creates a piece type.
-         *
-         * @param    value   the value of that piece when captured.
-         */
-        private PieceType(int value)
-        {
-            this.value = value;
-        }
-
-        /**
-         * A way to get the value of a piece.
-         * 
-         * @return   the value of the piece
-         */
-        public int getValue()
-        {
-            return value;
-        }
-    }
 
     private Piece[][] board;
-    
-    /**
-     * 
-     * @author Areeb Emran
-     * 
-     * A class for an individual piece.
-     */
-    private class Piece 
-    {   
-        private PieceType type;
-        public final PieceColor color; 
-        private boolean hasMoved; 
-        
-        /**
-         * A constructor for the piece.
-         * 
-         * @param type	The type of piece it is.
-         * 
-         * @param color What color it is.
-         */
-        public Piece(PieceType type, PieceColor color)
-        {
-            this.type = type;
-            this.color = color;
-            this.hasMoved = false;
-        }
-
-        /**
-         * Returning the value of this as a string (no access to position)
-         */
-        public String toString()
-        {
-            return type + " of " + color;
-        }
-        
-        /**
-         * A method designed exclusively for the pawn when it reaches the end of the board..
-         * 
-         * @param type The type this piece will change to.
-         */
-        public void setType(PieceType type)
-        {
-        	this.type = type;
-        }
-        
-        /**
-         * A method for getting the piece type.
-         * 
-         * @return the type this piece is.
-         */
-        public PieceType getPieceType()
-        {
-        	return type;
-        }
-        
-        /**
-         * Getting the color of this piece.
-         * 
-         * @return the color
-         */
-        public PieceColor getColor()
-        {
-        	return color;
-        }
-        
-        /**
-         * Checking if the piece has already moved (applies to pawns, rooks, and kings)
-         *  
-         * @return if the piece has moved.
-         */
-        public boolean hasMovedAlready()
-        {
-        	return hasMoved;
-        }
-        
-        /**
-         * This method has to be called when a piece makes a move.
-         */
-        public void madeMove()
-        {
-        	this.hasMoved = true;
-        }
-    }
     
     /**
      * A constructor to create the board. 
@@ -182,7 +50,7 @@ public class Logic
      *   1|   |   |   |   |   |   |   |   |
      *   _|___|___|___|___|___|___|___|___|      
      *   
-     *   White goes on the top columns, black goes on the bottom.
+     *   White goes on the bottom columns, black goes on the top.
     */
     public Logic()
     {
@@ -191,27 +59,27 @@ public class Logic
         
         for (int col = 0; col < SIZE; col++)
         {
-            setPiece(col, 1, new Piece(PieceType.PAWN, PieceColor.WHITE));
-            setPiece(col, 6, new Piece(PieceType.PAWN, PieceColor.BLACK));    
+            setPiece(col, 1, new Piece(Piece.Type.PAWN, Piece.Color.WHITE));
+            setPiece(col, 6, new Piece(Piece.Type.PAWN, Piece.Color.BLACK));    
         }
 
-        placePiece("a1", new Piece(PieceType.ROOK, PieceColor.WHITE));
-        placePiece("b1", new Piece(PieceType.KNIGHT, PieceColor.WHITE));
-        placePiece("c1", new Piece(PieceType.BISHOP, PieceColor.WHITE));
-        placePiece("d1", new Piece(PieceType.QUEEN, PieceColor.WHITE));
-        placePiece("e1", new Piece(PieceType.KING, PieceColor.WHITE));
-        placePiece("f1", new Piece(PieceType.BISHOP, PieceColor.WHITE));
-        placePiece("g1", new Piece(PieceType.KNIGHT, PieceColor.WHITE));
-        placePiece("h1", new Piece(PieceType.ROOK, PieceColor.WHITE));
+        placePiece("a1", new Piece(Piece.Type.ROOK, Piece.Color.WHITE));
+        placePiece("b1", new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE));
+        placePiece("c1", new Piece(Piece.Type.BISHOP, Piece.Color.WHITE));
+        placePiece("d1", new Piece(Piece.Type.QUEEN, Piece.Color.WHITE));
+        placePiece("e1", new Piece(Piece.Type.KING, Piece.Color.WHITE));
+        placePiece("f1", new Piece(Piece.Type.BISHOP, Piece.Color.WHITE));
+        placePiece("g1", new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE));
+        placePiece("h1", new Piece(Piece.Type.ROOK, Piece.Color.WHITE));
 
-        placePiece("a8", new Piece(PieceType.ROOK, PieceColor.BLACK));
-        placePiece("b8", new Piece(PieceType.KNIGHT, PieceColor.BLACK));
-        placePiece("c8", new Piece(PieceType.BISHOP, PieceColor.BLACK));
-        placePiece("d8", new Piece(PieceType.QUEEN, PieceColor.BLACK));
-        placePiece("e8", new Piece(PieceType.KING, PieceColor.BLACK));
-        placePiece("f8", new Piece(PieceType.BISHOP, PieceColor.BLACK));
-        placePiece("g8", new Piece(PieceType.KNIGHT, PieceColor.BLACK));
-        placePiece("h8", new Piece(PieceType.ROOK, PieceColor.BLACK));
+        placePiece("a8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
+        placePiece("b8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
+        placePiece("c8", new Piece(Piece.Type.BISHOP, Piece.Color.BLACK));
+        placePiece("d8", new Piece(Piece.Type.QUEEN, Piece.Color.BLACK));
+        placePiece("e8", new Piece(Piece.Type.KING, Piece.Color.BLACK));
+        placePiece("f8", new Piece(Piece.Type.BISHOP, Piece.Color.BLACK));
+        placePiece("g8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
+        placePiece("h8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
     }
 
     /**
@@ -343,7 +211,7 @@ public class Logic
     	
     	Piece p = this.getPiece(col, row);
     	ArrayList<String[]> moves = new ArrayList<>();
-    	switch (p.getPieceType())
+    	switch (p.getType())
     	{
     		case PAWN:
     			getPawnMoves(moves, p.hasMovedAlready(), p.getColor(), row, col);
@@ -371,7 +239,7 @@ public class Logic
 	private void getKingMoves(
 			ArrayList<String[]> moves,
 			boolean hasMovedAlready, 
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
@@ -380,7 +248,7 @@ public class Logic
 
 	private void getQueenMoves(
 			ArrayList<String[]> moves,
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
@@ -389,7 +257,7 @@ public class Logic
 
 	private void getKnightMoves(
 			ArrayList<String[]> moves,
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
@@ -398,7 +266,7 @@ public class Logic
 
 	private void getBishopMoves(
 			ArrayList<String[]> moves,
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
@@ -408,7 +276,7 @@ public class Logic
 	private void getRookMoves(
 			ArrayList<String[]> moves,
 			boolean hasMovedAlready, 
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
@@ -419,16 +287,14 @@ public class Logic
 	private void getPawnMoves(
 			ArrayList<String[]> moves,
 			boolean hasMovedAlready, 
-			PieceColor color, 
+			Piece.Color color, 
 			int row, 
 			int col) 
 	{
 		int oneTileMove = 1;
-		int twoTileMove = 2;
-		if (color.equals(PieceColor.BLACK))
+		if (color.equals(Piece.Color.BLACK))
 		{
 			oneTileMove *= -1;
-			twoTileMove *= -1;
 		}
 		
 		// 1 forward
@@ -444,7 +310,7 @@ public class Logic
 			moves.add(new String[] {Logic.toCoordinates(col, row + 2 * oneTileMove), null});
 		}
 		
-		// corner attacks
+		// corner capture
 		Piece leftUp = getPiece(col - oneTileMove, row + oneTileMove);
 		if (leftUp != null 
 				&& !leftUp.getColor().equals(color))
@@ -453,8 +319,64 @@ public class Logic
 			moves.add(new String[] {coord, coord});
 		}
 		
-		Piece rightUp = getPiece(col);
+		Piece rightUp = getPiece(col, row);
 	}
+
+    /**
+     * get the cardinal moves.
+     * 
+     *
+     */
+    private void getCardinalMoves(int col, int row, Piece.Color color)
+    {
+        int startCol = convertToCol('a');
+        int endCol = convertToCol('h');
+        int startRow = convertToRow('1');
+        int endRow = convertToRow('8');
+        // rightwards movement
+        for (int i = col + 1; i <= endCol; i++)
+        {
+            if (canMakeMove(Type.MOVE, row, i, color))
+            {
+                
+            }
+            else if (canMakeMove(Type.ATTACK, row, i, color))
+            {
+                
+            }
+            else 
+            {
+                
+            }
+        }
+
+        // leftwards movement
+        for (int i = col - 1; i >= startCol; i++)
+        {
+            if (canMakeMove(Type.MOVE, row, i, color))
+            {
+                
+            }
+        }
+
+        // downwards movement
+        for (int i = row + 1; i <= endRow; i++)
+        {
+            if (canMakeMove(Type.MOVE, i, col, color))
+            {
+                
+            }
+        }
+
+        // rightwards movement
+        for (int i = row - 1; i >= startRow; i++)
+        {
+            if (canMakeMove(Type.MOVE, i, col, color))
+            {
+                
+            }
+        }
+    }
     
 	/**
 	 * See if a move can be made. 
@@ -469,28 +391,49 @@ public class Logic
 			Type typeOfMove, 
 			int row, 
 			int col, 
-			PieceColor color)
+			Piece.Color color)
 	{
+        if (!Logic.withinRange(row, col))
+        {
+            return false;
+        }
+        Piece p;
 		switch (typeOfMove)
 		{
+            case TRANSFORM:
 			case MOVE:
-				if (getPiece(col, row) == null && Logic.withinRange(row, col))
-				{
-					return true;
-				}
-				break;
+                return getPiece(col, row) == null;
+                
 			case EN_PASSENT:
-				
-				break;
+				p = getPiece(col, row);
+                return p != null 
+                    && !p.getColor().equals(color)
+                    && p.getType().equals(Piece.Type.PAWN);
+                
 			case SIMPLE_CAPTURE:
-				
-				break;
+				p = getPiece(col, row);
+                return p != null 
+                        && !p.getColor().equals(color);
+                
 			case CASTLE:
+				int startCol = convertToCol('a');
+                int change = 1;
+                if (col != convertToCol('b'))
+                {
+                    startCol = convertToCol('h');
+                    change = -1;
+                }
+                Piece p = getPiece(startCol, row);
+                if (p.equals(null))
+                {
+                    
+                }
+                int kingPosition = convertToCol('d');
+                for (int i = startCol + 1; i < kingPosition; i += change)
+                {
+                    
+                }
 				
-				break;
-			case TRANSFORM:
-				
-				break;
 		}
 		return false;
 	}
@@ -518,5 +461,14 @@ public class Logic
 		return positionOne >= 0 && positionOne < SIZE
 				&& positionTwo >= 0 && positionTwo < SIZE;
 	}
-    
+
+    private static int convertToRow(char c)
+    {
+        return (int) (c - '1');
+    }
+
+    private static int convertToCol(char c)
+    {
+        return (int) (c - 'a');
+    }
 }
