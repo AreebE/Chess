@@ -48,6 +48,7 @@ public class Piece
     private Type type;
     private Color color;
     private boolean hasMoved; 
+    private int movesMade;
 
         
     /**
@@ -62,6 +63,7 @@ public class Piece
         this.type = type;
         this.color = color;
         this.hasMoved = false;
+        movesMade = 0;
     }
 
     /**
@@ -118,6 +120,12 @@ public class Piece
     public void madeMove()
     {
         this.hasMoved = true;
+        movesMade++;
+    }
+    
+    public int getMovesMade()
+    {
+    	return movesMade;
     }
 
 }
