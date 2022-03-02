@@ -7,7 +7,13 @@ import game.chess.Piece.Color;
 
 public class Logic 
 {
+    private static final Piece WHITE_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.WHITE);
+    private static final Piece BLACK_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.BLACK);
     private static final int SIZE = 8;
+    
+    private static final int IS_POSSIBLE = 0;
+    private static final int IMPOSSIBLE = 1;
+    private static final int KING_IN_CHECK = 2;
 
     
     /**
@@ -578,17 +584,21 @@ public class Logic
     {
     	 if (canMakeMove(Type.MOVE, row, col, color))
          {
-             moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.MOVE.val)});
-             return true;
+            moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.MOVE.val)}); 
+            return true;
          }
          else if (canMakeMove(Type.SIMPLE_CAPTURE, row, col, color))
          {
-         	moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.SIMPLE_CAPTURE.val)});
+            moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.SIMPLE_CAPTURE.val)}); 
          	return false;
          }
-         else 
+         else if (getPiece(col, row).color().equals(color))
          {
          	return false;
+         }
+        else 
+         {
+             return true;
          }
     }
     
@@ -602,7 +612,7 @@ public class Logic
 	 * @param color
 	 * @return
 	 */
-	private boolean canMakeMove (
+	private int canMakeMove (
 			Type typeOfMove, 
 			int row, 
 			int col, 
@@ -613,17 +623,42 @@ public class Logic
             return false;
         }
         Piece p;
-		switch (typeOfMove)
+        Piece holder;
+        Piece friendly = (color.equals(Piece.Color.White))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
+		Piece foe = (color.equals(Piece.Color.White))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
+        switch (typeOfMove)
 		{
 			case MOVE:
-                return getPiece(col, row) == null;
+                if (getPiece(col, row) == null)
+                {
+                    setPiece(col, row, friendly);
+                    boolean kingInCheck = isSpotInDanger(color);
+                    setPiece(col, row, null);    
+                    if (isSpotInDanger(color)))
+                    {
+                        return KING_IN_CHECK;
+                    }
+                    else 
+                    {
+                        return POSSIBLE;
+                    }
+                }
                 
 			case EN_PASSENT:
 				p = getPiece(col - 1, row);
-                return p != null 
+                if (p != null 
                     && !p.getColor().equals(color)
                     && p.getType().equals(Piece.Type.PAWN)
-                    && p.getMovesMade() == 1;
+                    && p.getMovesMade() == 1)
+                {
+
+                    boolean kingInCheck}
+                    if ()
+                    else 
+                    {
+                    
+                    }
+                }
                 
 			case SIMPLE_CAPTURE:
 				p = getPiece(col, row);
@@ -667,9 +702,15 @@ public class Logic
                 return true;
 				
 		}
-		return false;
+		return IMPOSSIBLE;
 	}
-	
+
+    private boolean isSpotInDanger(Piece.Color kingColor)
+    {
+        int index = kingColor.equals(Piece.Color.WHITE)? Logic.WHITE_KING: Logic.BLACK_KING;
+        int coord = Logic.toCoordinates(kingPositions[index]);
+        return isSpotInDanger(coord[0], coord[1], kingColor);
+    }
 	/**
 	 * 
 	 * @param row

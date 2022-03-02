@@ -27,7 +27,7 @@ class Main {
 	  
 	  l.clearBoard();
 	  l.placePiece("d1", whiteKing);
-	  l.placePiece("d4", blackKing);
+	  l.placePiece("d8", blackKing);
 //	  printMoves(l.getAllPossibilities("d1"));
 //	  l.placePiece("d8", null);
 //	  l.placePiece("c2", blackKing);
