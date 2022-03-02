@@ -11,7 +11,7 @@ public class Logic
     private static final Piece BLACK_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.BLACK);
     private static final int SIZE = 8;
     
-    private static final int IS_POSSIBLE = 0;
+    private static final int POSSIBLE = 0;
     private static final int IMPOSSIBLE = 1;
     private static final int KING_IN_CHECK = 2;
 
@@ -252,18 +252,12 @@ public class Logic
     	Piece p = this.getPiece(col, row);
     	if (p == null) 
     	{
-    		return new ArrayList<String[]>();
+    		return null;
     	}
+    	
     	Piece.Color color = p.getColor();
     	int[] kingCoord = Logic.toCoordinates(kingPositions[(color.equals(Piece.Color.BLACK))? Logic.BLACK_KING: Logic.WHITE_KING]);
     	this.setPiece(col, row, null);
-    	boolean canMakeMove = !isSpotInDanger(kingCoord[0], kingCoord[1], color) || p.getType().equals(Piece.Type.KING);
-		this.setPiece(col, row, p);
-    	if (!canMakeMove)
-    	{
-    		System.out.println("danger");
-    		return new ArrayList<String[]>();
-    	}
     	
     	ArrayList<String[]> moves = new ArrayList<>();
     	switch (p.getType())
@@ -284,33 +278,46 @@ public class Logic
     			getQueenMoves(moves, p.getColor(), row, col);
     			break;
     		case KING: 
-    			getKingMoves(moves, p.hasMovedAlready(), p.getColor(), row, col);
+    			getKingMoves(moves, p.hasMovedAlready(), p.getColor(), row, col, p);
     			break;
     		
     	}
+		this.setPiece(col, row, p);
 		return moves;
     }
-
+    
+    /**
+     * Get all moves a king can make (castling and moving one space in any direction)
+     * 
+     * @param moves		The list of moves
+     * @param hasMovedAlready	Whether the king is able to move
+     * @param color		The color of the king
+     * @param row		The row the king is on
+     * @param col		The column the king is on
+     * @param p			the king piece (only so the castling method works properly)
+     */
 	private void getKingMoves(
 			ArrayList<String[]> moves,
 			boolean hasMovedAlready, 
 			Piece.Color color, 
 			int row, 
-			int col) 
+			int col,
+			Piece p) 
 	{
 		// Check for castles
-		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('a'), color)
-				&& !isSpotInDanger(row, Logic.convertToCol('b'), color))
+		setPiece(col, row, p);
+//		System.out.println(canMakeMove(Type.CASTLE, row, Logic.convertToCol('a'), color));
+		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('a'), color) == POSSIBLE)
 		{
-			System.out.println(isSpotInDanger(row, Logic.convertToCol('b'), color));
+//			System.out.println(isSpotInDanger(row, Logic.convertToCol('b'), color));
 			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('b'), row), Integer.toString(Type.CASTLE.val)});
 		}
 		
-		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('h'), color)
-				&& !isSpotInDanger(row, Logic.convertToCol('f'), color))
+		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('h'), color) == POSSIBLE)
 		{
 			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('f'), row), Integer.toString(Type.CASTLE.val)});
 		}
+		setPiece(col, row, null);
 		
 		int[][] possibleOptions = new int[][] 
 				{
@@ -326,14 +333,18 @@ public class Logic
 				};
 		for (int[] coordinatePair: possibleOptions)
 		{
-			
-			if (!isSpotInDanger(coordinatePair[0], coordinatePair[1], color))
-			{
-				performCaptureAndMoveCheck(moves, coordinatePair[1], coordinatePair[0], color);
-			}
+			performCaptureAndMoveCheck(moves, coordinatePair[1], coordinatePair[0], color, true);
 		}
 	}
 
+	/**
+	 * All possible moves of a queen (Cardinal and Diagonal)
+	 * 
+	 * @param moves 	the list of moves
+	 * @param color		the color of the queen
+	 * @param row		the initial row
+	 * @param col		the initial column
+	 */
 	private void getQueenMoves(
 			ArrayList<String[]> moves,
 			Piece.Color color, 
@@ -344,6 +355,14 @@ public class Logic
 		getDiagonalMoves(moves, col, row, color);
 	}
 
+	/**
+	 * All possible moves of a knight (L shapes)
+	 * 
+	 * @param moves		the list of moves
+	 * @param color		the color of the knight
+	 * @param row		the row the knight is at
+	 * @param col		the column the knight is at
+	 */
 	private void getKnightMoves(
 			ArrayList<String[]> moves,
 			Piece.Color color, 
@@ -364,10 +383,18 @@ public class Logic
 				
 		for (int[] coordinates: possibleMoves)
 		{
-			performCaptureAndMoveCheck(moves, coordinates[0], coordinates[1], color);
+			performCaptureAndMoveCheck(moves, coordinates[1], coordinates[0], color);
 		}
 	}
 
+	/**
+	 * Get all moves of a bishop (diagonal)
+	 * 
+	 * @param moves		the list of moves
+	 * @param color		The color of the bishop
+	 * @param row		the initial row
+	 * @param col		the initial column
+	 */
 	private void getBishopMoves(
 			ArrayList<String[]> moves,
 			Piece.Color color, 
@@ -377,6 +404,15 @@ public class Logic
 		getDiagonalMoves(moves, col, row, color);
 	}
 
+	/**
+	 * Get all moves of a rook (cardinal and castling)
+	 * 
+	 * @param moves		The list of moves to add to.
+	 * @param hasMovedAlready	Whether the rook has already moved
+	 * @param color		The color of the piece
+	 * @param row		The row the rook starts at 
+	 * @param col		The starting column
+	 */
 	private void getRookMoves(
 			ArrayList<String[]> moves,
 			boolean hasMovedAlready, 
@@ -386,7 +422,7 @@ public class Logic
 	{
 		getCardinalMoves(moves, col, row, color);
 		if (!hasMovedAlready 
-				&& canMakeMove(Type.CASTLE, row, col, color))
+				&& canMakeMove(Type.CASTLE, row, col, color) == POSSIBLE)
 		{
 			int colToMove = (col == Logic.convertToCol('a'))? Logic.convertToCol('c'): Logic.convertToCol('e'); 
 			moves.add(new String[] {Logic.toCoordinates(colToMove, row), Integer.toString(Type.CASTLE.val)});
@@ -395,13 +431,13 @@ public class Logic
 
 	
 	/**
-	 * Get all moves of a pawn 
+	 * Get all moves of a pawn (diagonally, en-passant, forward one, and forward 2)
 	 * 
-	 * @param moves
-	 * @param hasMovedAlready
-	 * @param color
-	 * @param row
-	 * @param col
+	 * @param moves		the list of moves to add to.
+	 * @param hasMovedAlready	Whether the pawn has moved before or not
+	 * @param color		The color of the pawn
+	 * @param row		The starting row of this pawn
+	 * @param col		The starting column of this pawn
 	 */
 	private void getPawnMoves(
 			ArrayList<String[]> moves,
@@ -417,11 +453,11 @@ public class Logic
 		}
 		
 		// 1 && 2 forward
-		if (this.canMakeMove(Type.MOVE, row + oneTileMove, col, color))
+		if (this.canMakeMove(Type.MOVE, row + oneTileMove, col, color) == POSSIBLE)
 		{
 			moves.add(new String[]{Logic.toCoordinates(col, row + oneTileMove), Integer.toString(Type.MOVE.val)});
 			if (!hasMovedAlready
-					&& this.canMakeMove(Type.MOVE, row + 2 * oneTileMove, col, color))
+					&& this.canMakeMove(Type.MOVE, row + 2 * oneTileMove, col, color) == POSSIBLE)
 			{
 				moves.add(new String[] {Logic.toCoordinates(col, row + 2 * oneTileMove), Integer.toString(Type.MOVE.val)});
 			}
@@ -437,7 +473,7 @@ public class Logic
 		
 		for (int[] coordinates: possibleMoves)
 		{
-			if (this.canMakeMove(Type.SIMPLE_CAPTURE, coordinates[0], coordinates[1], color))
+			if (this.canMakeMove(Type.SIMPLE_CAPTURE, coordinates[0], coordinates[1], color) == POSSIBLE)
 			{
 				moves.add(new String[] {Logic.toCoordinates(coordinates[1], coordinates[0]), Integer.toString(Type.SIMPLE_CAPTURE.val)});
 			}
@@ -454,7 +490,7 @@ public class Logic
 					};
 			for (int[] coordinates: possibleMoves)
 			{
-				if (this.canMakeMove(Type.EN_PASSENT, coordinates[0], coordinates[1], color))
+				if (this.canMakeMove(Type.EN_PASSENT, coordinates[0], coordinates[1], color) == POSSIBLE)
 				{
 					moves.add(new String[] {Logic.toCoordinates(coordinates[1], coordinates[0]), Integer.toString(Type.EN_PASSENT.val)});
 				}
@@ -463,8 +499,12 @@ public class Logic
 	}
 
     /**
-     * get  cardinal moves.
+     * get all cardinal (or horizontal & vertical) moves.
      * 
+     * @param moves		The list of moves to append entries to
+     * @param col		the initial column
+     * @param row 		The initial row
+     * @param color		the color of this piece.
      *
      */
     private void getCardinalMoves(
@@ -508,12 +548,12 @@ public class Logic
     }
     
     /**
-     * Getting  diagonal moves.
+     * Getting all possible diagonal moves.
      * 
-     * @param moves
-     * @param col
-     * @param row
-     * @param color
+     * @param moves the moves array to add entries to.
+     * @param col	the starting column of the piece
+     * @param row	the starting row of the piece.
+     * @param color	the color of this piece.
      */
     private void getDiagonalMoves(
     		ArrayList<String[]> moves,
@@ -572,77 +612,135 @@ public class Logic
     }
     
     /**
-     * 
-     * 
+     * Check the other one (this is an overloaded method)
+     * @param moves
+     * @param col
+     * @param row
+     * @param color
+     * @return
      */
-    
     private boolean performCaptureAndMoveCheck(
     		ArrayList<String[]> moves,
     		int col, 
     		int row, 
     		Piece.Color color)
     {
-    	 if (canMakeMove(Type.MOVE, row, col, color))
-         {
-            moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.MOVE.val)}); 
-            return true;
-         }
-         else if (canMakeMove(Type.SIMPLE_CAPTURE, row, col, color))
-         {
-            moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.SIMPLE_CAPTURE.val)}); 
-         	return false;
-         }
-         else if (getPiece(col, row).color().equals(color))
-         {
-         	return false;
-         }
-        else 
-         {
-             return true;
-         }
+    	return performCaptureAndMoveCheck(moves, col, row, color, false);
+    }
+    
+    /**
+     * A method to see if a piece can either move to the place or attack the piece already present.
+     * If so, it adds the piece to the moves array it was given.
+     * 
+     * @param col	the column to move to.
+     * @param row	the row to move to.
+     * @param color 	the color of this piece.
+     * 
+     * @return if the moving piece is able to 'keep going.' This largely applies to the bishops, queens, and rooks since they can't move past friendly pieces.
+     * 
+     */
+    private boolean performCaptureAndMoveCheck(
+    		ArrayList<String[]> moves,
+    		int col, 
+    		int row, 
+    		Piece.Color color,
+    		boolean kingIsMakingMove)
+    {
+    	int result = canMakeMove(Type.MOVE, row, col, color, kingIsMakingMove);
+//    	System.out.println(result);
+    	switch(result)
+    	{
+    		case POSSIBLE:
+    			moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.MOVE.val)}); 
+    		case KING_IN_CHECK:
+    			return true;
+    		case IMPOSSIBLE:
+    			int attackResult = canMakeMove(Type.SIMPLE_CAPTURE, row, col, color, kingIsMakingMove);
+    			if (attackResult == POSSIBLE)
+    			{
+    				 moves.add(new String[] {Logic.toCoordinates(col, row), Integer.toString(Type.SIMPLE_CAPTURE.val)}); 
+    			}
+    			return false;
+    	}
+    	return true;
     }
     
     
+    /**
+     * An overloaded method: better to check the original. This is for pieces that aren't the king.
+     * 
+     * @param typeOfMove	the type of move
+     * @param row		the row to move to
+     * @param col		the column to move to
+     * @param color		The color of the piece making the move
+     * 
+     * @return	3 different outcomes (check the other version)
+     */
+    private int canMakeMove (
+    		Type typeOfMove,
+    		int row,
+    		int col,
+    		Piece.Color color)
+    {
+    	return canMakeMove(typeOfMove, row, col, color, false);
+    }
+    
 	/**
-	 * See if a move can be made. 
+	 * See if a move can be made. *
 	 * 
-	 * @param typeOfMove
-	 * @param row
-	 * @param col
-	 * @param color
-	 * @return
+	 * There are also four types of moves this can process: 
+	 * 	
+	 * 		* Move -- can the piece move to an empty space?
+	 * 		* En-passant -- Can the pawn capture the upcoming pawn?**
+	 * 		* Simple-capture -- Can the piece capture whatever piece is on the space***?
+	 * 		* Castle -- Can the king and rook make a castle option?
+	 * 
+	 * * It should be noted the check requires the piece to be removed from its original position.
+	 * ** This presumes the attacking pawn is in the right position
+	 * *** It presumes other conditions are met (ex. if a rook has line-of-sight of the position)
+	 * 
+	 * @param typeOfMove	What move to check for
+	 * @param row		The row the piece wants to move to/on.
+	 * @param col		The column the piece wants to move to, with one exception with the castle. 
+	 * 					* For the castle, the column tells the position of the rook to check.
+	 * @param color		The color of the piece making the move
+	 * @param isKingMakingMove Whether it is the king making the move or not.
+	 * 
+	 * @return 	It will return 3 different outcomes: 
+	 * 		* If the move can be made.
+	 * 	 	* If the move can theoretically be made, BUT the move would place the friendly king in check. 
+	 * 		* If the move cannot be made. 
 	 */
 	private int canMakeMove (
 			Type typeOfMove, 
 			int row, 
 			int col, 
-			Piece.Color color)
+			Piece.Color color,
+			boolean isKingMakingMove)
 	{
+	
         if (!Logic.withinRange(row, col))
         {
-            return false;
+            return IMPOSSIBLE;
         }
         Piece p;
-        Piece holder;
-        Piece friendly = (color.equals(Piece.Color.White))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
-		Piece foe = (color.equals(Piece.Color.White))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
+        Piece friendly = (color.equals(Piece.Color.WHITE))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
+		boolean kingInCheck = false;
+		int result = IMPOSSIBLE;
         switch (typeOfMove)
 		{
 			case MOVE:
                 if (getPiece(col, row) == null)
                 {
+                    result = POSSIBLE;
+
                     setPiece(col, row, friendly);
-                    boolean kingInCheck = isSpotInDanger(color);
-                    setPiece(col, row, null);    
-                    if (isSpotInDanger(color)))
-                    {
-                        return KING_IN_CHECK;
-                    }
-                    else 
-                    {
-                        return POSSIBLE;
-                    }
+                    
+                    kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color) == null: isSpotInDanger(color);
+                    setPiece(col, row, null);   
+                  
                 }
+                break;
                 
 			case EN_PASSENT:
 				p = getPiece(col - 1, row);
@@ -651,24 +749,34 @@ public class Logic
                     && p.getType().equals(Piece.Type.PAWN)
                     && p.getMovesMade() == 1)
                 {
-
-                    boolean kingInCheck}
-                    if ()
-                    else 
-                    {
-                    
-                    }
+                	result = POSSIBLE;
+                	
+                	setPiece(col, row, friendly);
+                    kingInCheck = isSpotInDanger(color);
+                	setPiece(col, row, p);
+                	
                 }
+                break;
                 
 			case SIMPLE_CAPTURE:
 				p = getPiece(col, row);
-                return p != null 
-                        && !p.getColor().equals(color);
+				if (p != null 
+						&& !p.getColor().equals(color))
+				{
+					result = POSSIBLE;
+					
+					setPiece(col, row, friendly);
+					kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color) != null: isSpotInDanger(color);
+					setPiece(col, row, p);
+				}
+				
+				break;
                 
 			case CASTLE:
 				int startCol = convertToCol('a');
                 int change = 1;
-                if (col != convertToCol('a'))
+                boolean onLeftSide = col == convertToCol('a');
+                if (!onLeftSide)
                 {
                     startCol = convertToCol('h');
                     change = -1;
@@ -678,6 +786,8 @@ public class Logic
                 Piece rook = getPiece(startCol, row);
                 Piece king = getPiece(kingCol, row);
 //                System.out.println(startCol + " , " + row);
+//            	System.out.println(col + " , " + row + "; " + typeOfMove.toString() + " --  " + color.toString() + " = " + isKingMakingMove);
+
                 if (king == null
                 		|| rook == null
                 		|| !rook.getType().equals(Piece.Type.ROOK)
@@ -687,8 +797,7 @@ public class Logic
                 		|| !king.getColor().equals(rook.getColor())
                 		)
                 {
-                	System.out.println("e");
-                    return false;
+                	break;
                 }
                 
                 for (int i = startCol + change; i != kingCol; i += change)
@@ -696,29 +805,59 @@ public class Logic
                 	p = getPiece(i, row);
                     if (p != null)
                     {
-                        return false;
+                    	break;
                     }
                 }
-                return true;
-				
-		}
-		return IMPOSSIBLE;
+                result = POSSIBLE;
+                
+                int kingNewCol = (onLeftSide)? convertToCol('b'): convertToCol('f');
+                int rookNewCol = kingNewCol + change;
+                
+                setPiece(kingCol, row, null);
+                setPiece(kingNewCol, row, king);
+                setPiece(rookNewCol, row, rook);
+                kingInCheck = isSpotInDanger(color);
+                setPiece(kingCol, row, king);
+                setPiece(kingNewCol, row, null);
+                setPiece(rookNewCol, row, null);
+                
+                break;
+		}  
+        
+		
+		return (kingInCheck)? KING_IN_CHECK: result;
 	}
-
+	
+	
+	/**
+	 * A convenience check to see if the king is in danger.
+	 * 
+	 * @param kingColor The color of the king.
+	 * @return	If the king is in danger.
+	 */
     private boolean isSpotInDanger(Piece.Color kingColor)
     {
         int index = kingColor.equals(Piece.Color.WHITE)? Logic.WHITE_KING: Logic.BLACK_KING;
-        int coord = Logic.toCoordinates(kingPositions[index]);
-        return isSpotInDanger(coord[0], coord[1], kingColor);
+        int[] coord = Logic.toCoordinates(kingPositions[index]);
+        return isSpotInDanger(coord[0], coord[1], kingColor) != null;
     }
+    
 	/**
+	 * Do a check to see if the specific spot can be attacked by any piece.
 	 * 
-	 * @param row
-	 * @param col
-	 * @param color
-	 * @return
+	 * @param row		The row of the space
+	 * @param col		The column of the space
+	 * @param color		The friendly side. (and consequently, which color could attack the king)
+	 * @return		The piece that is attacking this spot. There could be multiple, but it prioritizes in this order:
+	 * 	
+	 * 				* Knight 
+	 *  			* Pawn
+	 *  			* Queen 
+	 *  			* Bishop
+	 *  			* Rook
+	 *  			* King
 	 */
-	private boolean isSpotInDanger(int row, int col, Color color)
+	private Piece isSpotInDanger(int row, int col, Color color)
 	{
 		int[][] knightAttacks = new int[][]
 				{
@@ -739,7 +878,7 @@ public class Logic
 					&& knight.getType().equals(Piece.Type.KNIGHT)
 					&& !color.equals(knight.getColor()))
 			{
-				return true;
+				return knight;
 			}
 		}
 		
@@ -756,7 +895,7 @@ public class Logic
 					&& pawn.getType().equals(Piece.Type.PAWN)
 					&& !color.equals(pawn.getColor()))
 			{
-				return true;
+				return pawn;
 			}
 		}
 				
@@ -773,7 +912,7 @@ public class Logic
 					{row - 1, col + 1, -1, 1, DIAGONAL},
 					{row - 1, col - 1, -1, -1, DIAGONAL}
 				};
-		System.out.println(Logic.toCoordinates(col, row));
+//		System.out.println(Logic.toCoordinates(col, row));
 		for(int[] directionParts: directionalChecks)
 		{
 			int curRow = directionParts[0];
@@ -802,7 +941,7 @@ public class Logic
 								|| (type == DIAGONAL && pieceType.equals(Piece.Type.BISHOP))
 						)
 						{
-							return true;
+							return p;
 						}
 						break;
 					}
@@ -812,18 +951,22 @@ public class Logic
 			}
 		}
 		
-		int[] orKingCoord = Logic.toCoordinates((color.equals(Piece.Color.BLACK))? kingPositions[Logic.WHITE_KING]: kingPositions[Logic.BLACK_KING]);
-		return Math.abs(orKingCoord[0] - row) <= 1
-				&& Math.abs(orKingCoord[1] - col) <= 1;
+		String coordinates = (color.equals(Piece.Color.BLACK))? kingPositions[Logic.WHITE_KING]: kingPositions[Logic.BLACK_KING];
+		int[] otherKingCoord = Logic.toCoordinates(coordinates);
+		Piece king = this.getPiece(coordinates);
+		return (Math.abs(otherKingCoord[0] - row) <= 1
+				&& Math.abs(otherKingCoord[1] - col) <= 1)
+				? 
+						king: null;
 				
 	}
 	
 	/**
 	 * Do a test to see if a row and column is in  right range.
 	 * 
-	 * @param positionOne
-	 * @param positionTwo
-	 * @return
+	 * @param positionOne	Either row or column
+	 * @param positionTwo	Either row or column.
+	 * @return	If the rows and columns are in the right range.
 	 */
 	public static boolean withinRange(int positionOne, int positionTwo)
 	{
@@ -831,16 +974,32 @@ public class Logic
 				&& positionTwo >= 0 && positionTwo < SIZE;
 	}
 
-    private static int convertToRow(char c)
+	
+	/**
+	 * Convert a character to its respective row (1-8)
+	 * 
+	 * @param r the character given
+	 * @return Its row index.
+	 */
+    private static int convertToRow(char r)
     {
-        return (int) (c - '1');
+        return (int) (r - '1');
     }
 
+    /**
+     * Convert a character to its respective column (a-h)
+     * 
+     * @param c the character given
+     * @return Its corresponding column index.
+     */
     private static int convertToCol(char c)
     {
         return (int) (c - 'a');
     }
     
+    /**
+     * A debug method for clearing the board
+     */
     public void clearBoard()
     {
     	board = new Piece[8][8];

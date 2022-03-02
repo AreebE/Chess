@@ -18,16 +18,18 @@ class Main {
 	  
 	  Piece blackKing = new Piece(Piece.Type.KING, Piece.Color.BLACK);
 	  Piece whiteKing = new Piece(Piece.Type.KING, Piece.Color.WHITE);
-	  blackKing.madeMove();
+//	  blackKing.madeMove();
 	  // Test white & black pawn movement moves
 //	  printMoves(l.getAllPossibilities("a2"));
 //	  printMoves(l.getAllPossibilities("a7"));
 //	  printMoves(l.getAllPossibilities("d2"));
 //	  printMoves(l.getAllPossibilities("d7"));
 	  
+//	  printMoves(l.getAllPossibilities("g8"));
+	  
 	  l.clearBoard();
-	  l.placePiece("d1", whiteKing);
-	  l.placePiece("d8", blackKing);
+	  l.placePiece("f1", whiteKing);
+	  l.placePiece("c2", blackKing);
 //	  printMoves(l.getAllPossibilities("d1"));
 //	  l.placePiece("d8", null);
 //	  l.placePiece("c2", blackKing);
@@ -36,16 +38,33 @@ class Main {
 	  Piece blackRookOne = new Piece(Piece.Type.ROOK, Piece.Color.BLACK);
 	  Piece blackRookTwo = new Piece(Piece.Type.ROOK, Piece.Color.BLACK);
 	  Piece whiteRookOne = new Piece(Piece.Type.ROOK, Piece.Color.WHITE);
+	  Piece blackQueen = new Piece(Piece.Type.QUEEN, Piece.Color.BLACK);
 	  
-//	  blackRookOne.madeMove();
+	  Piece whitePawn = new Piece(Piece.Type.PAWN, Piece.Color.WHITE);
+	  Piece blackPawn = new Piece(Piece.Type.PAWN, Piece.Color.BLACK);
+	  Piece blackBishop = new Piece(Piece.Type.BISHOP, Piece.Color.BLACK);
+	  Piece whiteBishop = new Piece(Piece.Type.BISHOP, Piece.Color.WHITE);
+	  Piece whiteKnight = new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE);
+	  
+	  blackRookOne.madeMove();
+	  blackRookTwo.madeMove();
 	  whiteRookOne.madeMove();
-	  l.placePiece("h8", whiteRookOne);
-	  l.placePiece("g8", blackRookTwo);
-	  
+//	  l.placePiece("f5", whiteRookOne);
+//	  l.placePiece("c4", blackQueen);
+//	  l.placePiece("a4", whiteBishop);
+//	  l.placePiece("h4", blackBishop);
+//	  l.placePiece("c2", whitePawn);
 //	  l.placePiece("c7", whiteRookOne);
+//	  l.placePiece("a8", blackRookOne);
+//	  l.placePiece("c7", whiteRookOne);
+	  l.placePiece("d4", whiteKnight);
 //	  l.toString();
-	  printMoves(l.getAllPossibilities("g8"));
+//	  printMoves(l.getAllPossibilities("d6"));
 //	  printMoves(l.getAllPossibilities("h8"));
+//	  printMoves(l.getAllPossibilities("c4"));
+	  printMoves(l.getAllPossibilities("d4"));
+//	  System.out.println(l
+	  l.toString();
   }
   
   private static void printMoves(ArrayList<String[]> moves)
