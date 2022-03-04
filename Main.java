@@ -4,11 +4,15 @@ import game.chess.Piece;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.lang.Runnable;
+import javax.swing.SwingUtilities;
+import game.graphics.EncompassingPanel;
 
 class Main {
   public static void main(String[] args) {
     System.out.println("Hello world!");
-    debugLogic();
+//    debugLogic();
+    debugGraphics();
   }
   
   public static void debugLogic()
@@ -75,5 +79,19 @@ class Main {
 		  System.out.println(pos[0] + ", type: " + pos[1]);
 	  }
 	  System.out.println("End of moves!");
+  }
+  
+  public static void debugGraphics()
+  {
+      SwingUtilities.invokeLater(new Runnable()
+              {
+                  @Override
+                  public void run()
+                  {
+                      EncompassingPanel panel = new EncompassingPanel();
+                      panel.pack();
+                      panel.setVisible(true);
+                  }
+              });
   }
 }

@@ -857,7 +857,7 @@ public class Logic
 	 *  			* Rook
 	 *  			* King
 	 */
-	private Piece isSpotInDanger(int row, int col, Color color)
+	private int[] isSpotInDanger(int row, int col, Color color)
 	{
 		int[][] knightAttacks = new int[][]
 				{
@@ -878,7 +878,7 @@ public class Logic
 					&& knight.getType().equals(Piece.Type.KNIGHT)
 					&& !color.equals(knight.getColor()))
 			{
-				return knight;
+				return knightCoord;
 			}
 		}
 		
@@ -895,7 +895,7 @@ public class Logic
 					&& pawn.getType().equals(Piece.Type.PAWN)
 					&& !color.equals(pawn.getColor()))
 			{
-				return pawn;
+				return pawnCoord;
 			}
 		}
 				
@@ -941,7 +941,7 @@ public class Logic
 								|| (type == DIAGONAL && pieceType.equals(Piece.Type.BISHOP))
 						)
 						{
-							return p;
+							return new int[]{curRow, curCol};
 						}
 						break;
 					}
@@ -957,7 +957,7 @@ public class Logic
 		return (Math.abs(otherKingCoord[0] - row) <= 1
 				&& Math.abs(otherKingCoord[1] - col) <= 1)
 				? 
-						king: null;
+						otherKingCoord: null;
 				
 	}
 	
