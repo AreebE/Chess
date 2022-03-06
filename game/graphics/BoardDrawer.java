@@ -26,6 +26,7 @@ public class BoardDrawer extends JComponent
     	EmptyBorder border = new EmptyBorder(100, 100, 100, 100);
 //    	this.setBorder(border);
         board = null;
+        // ee
     }
 
     public void assignPieces(Piece[][] board)
@@ -36,6 +37,7 @@ public class BoardDrawer extends JComponent
     @Override 
     public void paint(Graphics g)
     {
+    	
         int height = getHeight();
         int width = getWidth();
 
