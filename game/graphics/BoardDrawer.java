@@ -23,7 +23,7 @@ public class BoardDrawer extends JComponent
     private static final int NUM_INTERVALS = 9;
     public BoardDrawer()
     {
-    	EmptyBorder border = new EmptyBorder(100, 100, 100, 100);
+    	EmptyBorder border = new EmptyBorder(1, 1, 1, 1);
 //    	this.setBorder(border);
         board = null;
         // ee
@@ -50,6 +50,7 @@ public class BoardDrawer extends JComponent
         betterGraphic.setStroke(new BasicStroke(margin));
         betterGraphic.setColor(Color.BLACK);
         betterGraphic.fillRect(0, 0, width, height);
+//        System.out.println(this.getBorder().getBorderInsets(this));
         System.out.println("\n__________________________________\n" + width + " ; " + height + " - " + margin);
 //        betterGraphic.drawRect(0, 0, width, height);
         boolean paintDarkTile = false;

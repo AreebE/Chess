@@ -11,6 +11,13 @@ public class Logic
     private static final Piece BLACK_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.BLACK);
     private static final int SIZE = 8;
     
+    
+    private static final int DIAGONAL = 0;
+    private static final int CARDINAL = 1;
+    private static final int KNIGHT = 2;
+    private static final int PAWN = 3;
+    private static final int KING = 4;
+    
     private static final int POSSIBLE = 0;
     private static final int IMPOSSIBLE = 1;
     private static final int KING_IN_CHECK = 2;
@@ -736,7 +743,7 @@ public class Logic
 
                     setPiece(col, row, friendly);
                     
-                    kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color) == null: isSpotInDanger(color);
+                    kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() == 0: isSpotInDanger(color);
                     setPiece(col, row, null);   
                   
                 }
@@ -766,7 +773,7 @@ public class Logic
 					result = POSSIBLE;
 					
 					setPiece(col, row, friendly);
-					kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color) != null: isSpotInDanger(color);
+					kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() == 0: isSpotInDanger(color);
 					setPiece(col, row, p);
 				}
 				
@@ -839,7 +846,7 @@ public class Logic
     {
         int index = kingColor.equals(Piece.Color.WHITE)? Logic.WHITE_KING: Logic.BLACK_KING;
         int[] coord = Logic.toCoordinates(kingPositions[index]);
-        return isSpotInDanger(coord[0], coord[1], kingColor) != null;
+        return isSpotInDanger(coord[0], coord[1], kingColor).size() == 0;
     }
     
 	/**
@@ -848,7 +855,7 @@ public class Logic
 	 * @param row		The row of the space
 	 * @param col		The column of the space
 	 * @param color		The friendly side. (and consequently, which color could attack the king)
-	 * @return		The piece that is attacking this spot. There could be multiple, but it prioritizes in this order:
+	 * @return		All pieces that are attacking this spot. There could be multiple, but it prioritizes in this order:
 	 * 	
 	 * 				* Knight 
 	 *  			* Pawn
@@ -856,9 +863,12 @@ public class Logic
 	 *  			* Bishop
 	 *  			* Rook
 	 *  			* King
+	 *  			
+	 *  			Each entry is in the format in {row, col, type}
 	 */
-	private int[] isSpotInDanger(int row, int col, Color color)
+	private ArrayList<int[]> isSpotInDanger(int row, int col, Color color)
 	{
+		ArrayList<int[]> attackingPieces = new ArrayList<>();
 		int[][] knightAttacks = new int[][]
 				{
 					{row + 1, col + 2},
@@ -878,7 +888,7 @@ public class Logic
 					&& knight.getType().equals(Piece.Type.KNIGHT)
 					&& !color.equals(knight.getColor()))
 			{
-				return knightCoord;
+				attackingPieces.add(new int[] {knightCoord[0], knightCoord[1], KNIGHT});
 			}
 		}
 		
@@ -895,12 +905,10 @@ public class Logic
 					&& pawn.getType().equals(Piece.Type.PAWN)
 					&& !color.equals(pawn.getColor()))
 			{
-				return pawnCoord;
+				attackingPieces.add(new int[] {pawnCoord[0], pawnCoord[1], PAWN});
 			}
 		}
 				
-		final int CARDINAL = 0;
-		final int DIAGONAL = 1;
 		int[][] directionalChecks = new int[][] 
 				{
 					{row, col + 1, 0, 1, CARDINAL},
@@ -941,7 +949,7 @@ public class Logic
 								|| (type == DIAGONAL && pieceType.equals(Piece.Type.BISHOP))
 						)
 						{
-							return new int[]{curRow, curCol};
+							attackingPieces.add(new int[]{curRow, curCol, type});
 						}
 						break;
 					}
@@ -953,13 +961,81 @@ public class Logic
 		
 		String coordinates = (color.equals(Piece.Color.BLACK))? kingPositions[Logic.WHITE_KING]: kingPositions[Logic.BLACK_KING];
 		int[] otherKingCoord = Logic.toCoordinates(coordinates);
+		int[] kingAttackValues = new int[]{otherKingCoord[0], otherKingCoord[1], KING};
 		Piece king = this.getPiece(coordinates);
-		return (Math.abs(otherKingCoord[0] - row) <= 1
+		if( (Math.abs(otherKingCoord[0] - row) <= 1
 				&& Math.abs(otherKingCoord[1] - col) <= 1)
-				? 
-						otherKingCoord: null;
-				
+				)
+		{
+			attackingPieces.add(kingAttackValues);			
+		}
+		
+		return attackingPieces;
 	}
+	
+	
+	/**
+	 * See if the king is in check and either has the possibility to make a move or another piece can move to take the hit.
+	 *  
+	 * @param color 	The color of the king.
+	 * @param checkingPieceCoord	The coordinates of the piece that is placing the king in check.
+	 * @return	if the king of the color given is in checkmate.
+	 */
+	private boolean inCheckmate(Piece.Color color, int[] checkingPieceCoord)
+	{
+		int[] kingCoord = Logic.toCoordinates(kingPositions[(color.equals(Piece.Color.BLACK))? BLACK_KING: WHITE_KING]);
+		if (getAllPossibilities(Logic.toCoordinates(kingCoord[0], kingCoord[1])).size() == 0)
+		{
+			int rowChange = kingCoord[0] < checkingPieceCoord[0] ? 1 : (kingCoord[0] == checkingPieceCoord[0]? 0: -1);
+			int colChange = kingCoord[1] < checkingPieceCoord[1] ? 1 : (kingCoord[1] == checkingPieceCoord[1]? 0: -1);
+			switch(checkingPieceCoord[2])
+			{
+				case CARDINAL:
+				case DIAGONAL:
+					int[] currentSpot = new int[] {kingCoord[0] + rowChange, kingCoord[1] + colChange};
+					while (currentSpot[0] != checkingPieceCoord[0] 
+							&& currentSpot[1] != checkingPieceCoord[1])
+					{
+						if (canBlockSpot(currentSpot, color))
+						{
+							return true;
+						}
+						currentSpot[0] += rowChange;
+						currentSpot[1] += colChange;
+					}					
+					
+				case KING:
+				case KNIGHT:
+				case PAWN:
+					if (canBlockSpot(checkingPieceCoord, color))
+					{
+						return false;
+					}
+					break;
+			}
+		}
+		return true;
+	}
+	
+	
+	private boolean canBlockSpot(int[] coord, Color c)
+	{
+		ArrayList<int[]> coordinatesOfAttackers = this.isSpotInDanger(coord[0], coord[1], c) ;
+		String spot = Logic.toCoordinates(coord[1], coord[0]);
+		for (int[] attacker: coordinatesOfAttackers)
+		{
+			ArrayList<String[]> possibilities = getAllPossibilities(Logic.toCoordinates(attacker[1], attacker[0]));
+			for (String[] move: possibilities)
+			{
+				if (move[0].equals(spot))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * Do a test to see if a row and column is in  right range.
@@ -1003,5 +1079,10 @@ public class Logic
     public void clearBoard()
     {
     	board = new Piece[8][8];
+    }
+    
+    public void makeMove(String first, String second)
+    {
+    	
     }
 }
