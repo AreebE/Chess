@@ -127,5 +127,10 @@ public class Piece
     {
     	return movesMade;
     }
+    
+    public int getValue()
+    {
+        return type.getValue();
+    }
 
 }

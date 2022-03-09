@@ -23,6 +23,10 @@ public class Logic
     private static final int KING_IN_CHECK = 2;
 
     
+    public interface PieceTeller 
+    {
+    	public Piece.Type askWhatToTransformTo();
+    }
     /**
      * 
      * @author Areeb Emran
@@ -45,11 +49,12 @@ public class Logic
     	
     }
     
+    private int[] points; /////////////
 
     private Piece[][] board;
     private String[] kingPositions;
-    private static final int BLACK_KING = 1;
-    private static final int WHITE_KING = 0;
+    public static final int BLACK_KING = 1;
+    public static final int WHITE_KING = 0;
     
     /**
      * A constructor to create  board. 
@@ -81,11 +86,18 @@ public class Logic
     {
         board = new Piece[SIZE][SIZE];
         kingPositions = new String[2];
-        
+        resetBoard();
+
+    }
+    
+    public void resetBoard()
+    {
+        clearBoard();
+        points = new int[2];
         for (int col = 0; col < SIZE; col++)
         {
-            setPiece(col, 1, new Piece(Piece.Type.PAWN, Piece.Color.WHITE));
-            setPiece(col, 6, new Piece(Piece.Type.PAWN, Piece.Color.BLACK));    
+            setPiece(col, Logic.convertToRow('2'), new Piece(Piece.Type.PAWN, Piece.Color.WHITE));
+            setPiece(col, Logic.convertToRow('7'), new Piece(Piece.Type.PAWN, Piece.Color.BLACK));    
         }
         
 
@@ -97,7 +109,6 @@ public class Logic
         placePiece("f1", new Piece(Piece.Type.BISHOP, Piece.Color.WHITE));
         placePiece("g1", new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE));
         placePiece("h1", new Piece(Piece.Type.ROOK, Piece.Color.WHITE));
-        kingPositions[WHITE_KING] = "e1";
         
         placePiece("a8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
         placePiece("b8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
@@ -107,9 +118,8 @@ public class Logic
         placePiece("f8", new Piece(Piece.Type.BISHOP, Piece.Color.BLACK));
         placePiece("g8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
         placePiece("h8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
-        kingPositions[BLACK_KING] = "e8";
     }
-
+    
     /**
      * Place a piece based on  string coordinates of "[a-h][1-8]"
      * * Will fail if  coordinate does not exist (ex. 2f, c-3, n5, and a10)
@@ -191,11 +201,10 @@ public class Logic
     /**
      * Get  piece at a given location
      * 
-     * @param col its column on  board
-     * @param row its row on  board.
+     * @param coordinate its coordinate
      * @return  piece at that point.
      */
-    private Piece getPiece(String coordinate) 
+    public Piece getPiece(String coordinate) 
     {
     	int[] coordinates = Logic.toCoordinates(coordinate);
     	return getPiece(coordinates[1], coordinates[0]);
@@ -208,7 +217,7 @@ public class Logic
      * @param row its row on  board.
      * @return  piece at that point.
      */
-    private Piece getPiece(int col, int row) 
+    public Piece getPiece(int col, int row) 
     {
     	try 
     	{
@@ -488,7 +497,10 @@ public class Logic
 				
 		
 		// en passant
-		if (row == Logic.convertToRow('5'))
+		if (
+				(row == Logic.convertToRow('5') && color.equals(Piece.Color.WHITE))
+				|| (row == Logic.convertToRow('3') && color.equals(Piece.Color.BLACK))
+			)
 		{
 			possibleMoves = new int[][]
 					{
@@ -743,7 +755,7 @@ public class Logic
 
                     setPiece(col, row, friendly);
                     
-                    kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() == 0: isSpotInDanger(color);
+                    kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() != 0: isSpotInDanger(color);
                     setPiece(col, row, null);   
                   
                 }
@@ -759,8 +771,10 @@ public class Logic
                 	result = POSSIBLE;
                 	
                 	setPiece(col, row, friendly);
+                	setPiece(col - 1, row, null);
                     kingInCheck = isSpotInDanger(color);
-                	setPiece(col, row, p);
+                	setPiece(col, row, null);
+                	setPiece(col - 1, row, p);
                 	
                 }
                 break;
@@ -773,7 +787,7 @@ public class Logic
 					result = POSSIBLE;
 					
 					setPiece(col, row, friendly);
-					kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() == 0: isSpotInDanger(color);
+					kingInCheck = (isKingMakingMove)? isSpotInDanger(row, col, color).size() != 0: isSpotInDanger(color);
 					setPiece(col, row, p);
 				}
 				
@@ -846,7 +860,7 @@ public class Logic
     {
         int index = kingColor.equals(Piece.Color.WHITE)? Logic.WHITE_KING: Logic.BLACK_KING;
         int[] coord = Logic.toCoordinates(kingPositions[index]);
-        return isSpotInDanger(coord[0], coord[1], kingColor).size() == 0;
+        return isSpotInDanger(coord[0], coord[1], kingColor).size() != 0;
     }
     
 	/**
@@ -1081,8 +1095,25 @@ public class Logic
     	board = new Piece[8][8];
     }
     
-    public void makeMove(String first, String second)
+    public int getPoints(int side)
     {
-    	
+        return points[side];
+    }
+
+    public boolean makeMove(String initSpot, String finalSpot)
+    {
+    	Piece moving = getPiece(initSpot);
+        Piece captured = getPiece(finalSpot);
+        Piece.Color currentColor = moving.getColor();
+        if (captured != null)
+        {
+            points[currentColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING] += captured.getValue();
+        }
+        placePiece(initSpot, null);
+        placePiece(finalSpot, moving);
+        Piece.Color oppColor = (currentColor.equals(Piece.Color.BLACK)? Piece.Color.WHITE: Piece.Color.BLACK);
+        int[] kingCoord = Logic.toCoordinates(kingPositions[oppColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING]);
+        ArrayList<int[]> attackerOfKing = isSpotInDanger(kingCoord[1], kingCoord[0], oppColor);
+        return (attackerOfKing.size() == 0)? true: !inCheckmate(oppColor, attackerOfKing.get(0));
     }
 }
