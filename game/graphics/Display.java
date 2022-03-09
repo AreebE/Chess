@@ -86,6 +86,7 @@ public class Display extends JPanel
         move.setLayout(moveInput);
         
         initialPosition = new JTextField();
+        initialPosition.addPropertyChangeListener("document", new DocumentListener());
         initialPosition.addInputMethodListener(new InputMethodListener() 
         		{
 
@@ -97,12 +98,18 @@ public class Display extends JPanel
 						{
 							updater.suggestMove(text);
 						}
+						System.out.println("called");
 					}
 
 					@Override
 					public void caretPositionChanged(InputMethodEvent event) {
 						// TODO Auto-generated method stub
-						
+						String text = initialPosition.getText();
+						if (text != null && text.length() != 0)
+						{
+							updater.suggestMove(text);
+						}
+						System.out.println("called");
 					}
         			
         		});
