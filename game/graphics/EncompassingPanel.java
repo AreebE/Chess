@@ -8,6 +8,7 @@ import game.chess.Piece;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.awt.Component;
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -166,7 +167,17 @@ public class EncompassingPanel
 	public void suggestMove(String start) {
 		// TODO Auto-generated method stub
 		ArrayList<String[]> options = l.getAllPossibilities(start);
-		board.assignOptions(options.toArray(new String[options.size()][2]));
+		System.out.println(start + ", " +l.getPiece(start) + ", " + options.toString());
+		
+		if (options != null)
+		{
+			for (String[] possibility: options)
+			{
+				System.out.println("Possibility:" + possibility[0]);
+			}
+			board.assignOptions(options.toArray(new String[options.size()][2]));			
+			board.invalidate();
+		}
 	}
 
 	@Override

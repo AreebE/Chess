@@ -11,6 +11,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
 
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import javax.swing.BoxLayout;
 
 public class Display extends JPanel
@@ -86,12 +89,23 @@ public class Display extends JPanel
         move.setLayout(moveInput);
         
         initialPosition = new JTextField();
-        initialPosition.addPropertyChangeListener("document", new DocumentListener());
-        initialPosition.addInputMethodListener(new InputMethodListener() 
+        initialPosition.getDocument().addDocumentListener(new DocumentListener()
         		{
 
 					@Override
-					public void inputMethodTextChanged(InputMethodEvent event) {
+					public void insertUpdate(DocumentEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void changedUpdate(DocumentEvent e) {
 						// TODO Auto-generated method stub
 						String text = initialPosition.getText();
 						if (text != null && text.length() != 0)
@@ -99,6 +113,32 @@ public class Display extends JPanel
 							updater.suggestMove(text);
 						}
 						System.out.println("called");
+					}
+        	
+        		});
+        
+        initialPosition.addActionListener(new ActionListener()
+        		{
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// TODO Auto-generated method stub
+						String text = initialPosition.getText();
+						if (text != null && text.length() != 0)
+						{
+							updater.suggestMove(text);
+						}
+						System.out.println("called");
+					}
+        			
+        		});
+        initialPosition.addInputMethodListener(new InputMethodListener() 
+        		{
+
+					@Override
+					public void inputMethodTextChanged(InputMethodEvent event) {
+						// TODO Auto-generated method stub
+						
 					}
 
 					@Override
