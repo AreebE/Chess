@@ -132,7 +132,8 @@ public class EncompassingPanel
 
 //        display.addComponentListener(new RatioSetter(2, 1));
 //        display.setSize(new Dimension(200, 400));
-       
+        this.turnsLeft = MAX_TURNS;//////
+        this.isBlackTurn = false; //////
         c.addComponentListener(new RatioSetter(2, 1));
         setContentPane(c);
     }
@@ -166,6 +167,8 @@ public class EncompassingPanel
 	@Override
 	public void suggestMove(String start) {
 		// TODO Auto-generated method stub
+		display.sendError(""); 
+        display.invalidate();
 		ArrayList<String[]> options = l.getAllPossibilities(start);
 		System.out.println(start + ", " +l.getPiece(start) + ", " + options.toString());
 		
@@ -196,15 +199,27 @@ public class EncompassingPanel
 			return;
 		}
 		
-		turnsLeft--;
+		Piece p = l.getPiece(firstPos);
+        boolean isBlackColor = p.getColor().equals(Piece.Color.BLACK);
+        if ((isBlackColor ^ isBlackTurn))
+        {
+            display.sendError("Wrong person's turn.");
+            display.invalidate();
+            return;
+        }
+        p.madeMove();
+		turnsLeft--; 
+
 		boolean inCheckmate = l.makeMove(firstPos, secondPos);
-		if (inCheckmate)
+		if (inCheckmate || turnsLeft == 0)
 		{
 			int whitePoints = l.getPoints(Logic.WHITE_KING);
 			int blackPoints = l.getPoints(Logic.BLACK_KING);
 			int winner = (whitePoints > blackPoints)? Display.WHITE: (blackPoints > whitePoints)? Display.BLACK: Display.NONE;
 			display.updateWinnerState(winner);
 		}
+		isBlackTurn = !isBlackTurn;
+        board.assignOptions(new String[0][0]); ///////
 		display.invalidate();
 		board.invalidate();
 	}

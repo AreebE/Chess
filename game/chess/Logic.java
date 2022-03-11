@@ -2,6 +2,7 @@ package game.chess;
 
 import java.lang.IndexOutOfBoundsException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import game.chess.Piece.Color;
 
@@ -340,7 +341,6 @@ public class Logic
 					{row + 1, col},
 					{row + 1, col + 1},
 					{row + 1, col - 1},
-					{row, col},
 					{row, col + 1},
 					{row, col - 1},
 					{row - 1, col},
@@ -826,7 +826,7 @@ public class Logic
                 	p = getPiece(i, row);
                     if (p != null)
                     {
-                    	break;
+                    	return IMPOSSIBLE;
                     }
                 }
                 result = POSSIBLE;
@@ -997,8 +997,13 @@ public class Logic
 	 */
 	private boolean inCheckmate(Piece.Color color, int[] checkingPieceCoord)
 	{
-		int[] kingCoord = Logic.toCoordinates(kingPositions[(color.equals(Piece.Color.BLACK))? BLACK_KING: WHITE_KING]);
-		if (getAllPossibilities(Logic.toCoordinates(kingCoord[0], kingCoord[1])).size() == 0)
+		System.out.println(Arrays.toString(kingPositions));
+        //////////
+        String chosenKing = kingPositions[(color.equals(Piece.Color.BLACK))? BLACK_KING: WHITE_KING];
+		int[] kingCoord = Logic.toCoordinates(chosenKing);
+        ArrayList<String[]> kingMovements = getAllPossibilities(chosenKing);
+        if (kingMovements == null || kingMovements.size() == 0)
+            /////////
 		{
 			int rowChange = kingCoord[0] < checkingPieceCoord[0] ? 1 : (kingCoord[0] == checkingPieceCoord[0]? 0: -1);
 			int colChange = kingCoord[1] < checkingPieceCoord[1] ? 1 : (kingCoord[1] == checkingPieceCoord[1]? 0: -1);

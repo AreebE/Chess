@@ -22,7 +22,8 @@ public class Display extends JPanel
 	public static final int NONE = -1;
 	public static final int WHITE = 0;
 	public static final int BLACK = 1;
-	
+    private String currentErrorMessage;
+
 	
 	public interface Updater 
 	{
@@ -63,7 +64,8 @@ public class Display extends JPanel
         turnsLeft = new JTextField();
         turnsLeft.setEnabled(false);
         add(turnsLeft);
-        
+        this.currentErrorMessage = "";
+
         // set up points
         JPanel points = new JPanel();
         points.setBackground(Color.DARK_GRAY);
@@ -87,7 +89,6 @@ public class Display extends JPanel
         JPanel move = new JPanel();
         BoxLayout moveInput = new BoxLayout(move, BoxLayout.X_AXIS);
         move.setLayout(moveInput);
-        
         initialPosition = new JTextField();
         initialPosition.getDocument().addDocumentListener(new DocumentListener()
         		{
@@ -192,11 +193,16 @@ public class Display extends JPanel
     	super.invalidate();
     	int[] currentPoints = updater.getPoints();
     	int remainingTurns = updater.getTurnsLeft();
-    	currentTurn.setText(updater.getTurn());
+    	currentTurn.setText(currentErrorMessage +  " " + updater.getTurn() + "\'s turn.");
     	turnsLeft.setText(remainingTurns + " turns left.");
     	pointFields[WHITE].setText("" + currentPoints[WHITE]);
     	pointFields[BLACK].setText("" + currentPoints[BLACK]);
 //    	System.out.println(turnsLeft.getY()+ "    EEEEEEEEEEEEEEEEEEEEEEEEE");
+    }
+    
+    public void sendError(String message)
+    {
+        currentErrorMessage = message;
     }
     
 }
