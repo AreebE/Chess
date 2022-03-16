@@ -210,17 +210,29 @@ public class EncompassingPanel
         p.madeMove();
 		turnsLeft--; 
 
-		boolean inCheckmate = l.makeMove(firstPos, secondPos);
-		if (inCheckmate || turnsLeft == 0)
+		boolean inCheckmate = !l.makeMove(firstPos, secondPos);
+		if (inCheckmate)
+		{
+			display.updateWinnerState((isBlackColor)? Display.BLACK: Display.WHITE);
+		} else if (turnsLeft == 0)
 		{
 			int whitePoints = l.getPoints(Logic.WHITE_KING);
 			int blackPoints = l.getPoints(Logic.BLACK_KING);
-			int winner = (whitePoints > blackPoints)? Display.WHITE: (blackPoints > whitePoints)? Display.BLACK: Display.NONE;
+			int winner = (whitePoints > blackPoints)? Display.WHITE: (blackPoints > whitePoints)? Display.BLACK: Display.TIE;
 			display.updateWinnerState(winner);
 		}
 		isBlackTurn = !isBlackTurn;
         board.assignOptions(new String[0][0]); ///////
 		display.invalidate();
 		board.invalidate();
+	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		l.resetBoard();
+		board.invalidate();
+		display.invalidate();
+		turnsLeft = MAX_TURNS;
 	}
 }

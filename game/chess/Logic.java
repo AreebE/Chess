@@ -91,6 +91,9 @@ public class Logic
 
     }
     
+    /**
+     * Reset the board to its original condition
+     */
     public void resetBoard()
     {
         clearBoard();
@@ -1036,7 +1039,12 @@ public class Logic
 		return true;
 	}
 	
-	
+	/**
+	 * See if anything can block this spot
+	 * @param coord the spot to block
+	 * @param c the color of the piece
+	 * @return if the spot can be blocked
+	 */
 	private boolean canBlockSpot(int[] coord, Color c)
 	{
 		ArrayList<int[]> coordinatesOfAttackers = this.isSpotInDanger(coord[0], coord[1], c) ;
@@ -1100,11 +1108,23 @@ public class Logic
     	board = new Piece[8][8];
     }
     
+    /**
+     * Get the points on a given side
+     * @param side the side to get points from
+     * @return the points that side has
+     */
     public int getPoints(int side)
     {
         return points[side];
     }
 
+    /**
+     * Make a move
+     * 
+     * @param initSpot the spot to start from
+     * @param finalSpot the spot to move to
+     * @return if the player can make other moves
+     */
     public boolean makeMove(String initSpot, String finalSpot)
     {
     	Piece moving = getPiece(initSpot);
@@ -1118,7 +1138,7 @@ public class Logic
         placePiece(finalSpot, moving);
         Piece.Color oppColor = (currentColor.equals(Piece.Color.BLACK)? Piece.Color.WHITE: Piece.Color.BLACK);
         int[] kingCoord = Logic.toCoordinates(kingPositions[oppColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING]);
-        ArrayList<int[]> attackerOfKing = isSpotInDanger(kingCoord[1], kingCoord[0], oppColor);
+        ArrayList<int[]> attackerOfKing = isSpotInDanger(kingCoord[0], kingCoord[1], oppColor);
         return (attackerOfKing.size() == 0)? true: !inCheckmate(oppColor, attackerOfKing.get(0));
     }
 }

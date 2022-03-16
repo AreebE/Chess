@@ -22,8 +22,29 @@ public class Display extends JPanel
 	public static final int NONE = -1;
 	public static final int WHITE = 0;
 	public static final int BLACK = 1;
+	public static final int TIE = 2;
     private String currentErrorMessage;
+    private ActionListener confirmActionListener = new ActionListener()
+	{
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			try 
+			{
+				String first = initialPosition.getText();
+				String second = finalPosition.getText();
+				updater.sendAction(first, second);
+			}
+			catch (NullPointerException npe)
+			{
+				currentErrorMessage = "Could not make move.";
+			}
+			initialPosition.setText(null);
+			finalPosition.setText(null);
+			
+		}
+	};
 	
 	public interface Updater 
 	{
@@ -32,6 +53,7 @@ public class Display extends JPanel
 		public int[] getPoints();
 		public void suggestMove(String start);
 		public void sendAction(String firstPos, String secondPos);
+		public void reset();
 	}
 	
 	private Updater updater;
@@ -53,6 +75,7 @@ public class Display extends JPanel
     public Display(Updater u)
     {
     	this.updater = u;
+    	this.winner = NONE;
     	GridLayout mainLayout = new GridLayout(5, 1);
     	setLayout(mainLayout);
     	
@@ -118,44 +141,11 @@ public class Display extends JPanel
         	
         		});
         
-        initialPosition.addActionListener(new ActionListener()
-        		{
-
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						String text = initialPosition.getText();
-						if (text != null && text.length() != 0)
-						{
-							updater.suggestMove(text);
-						}
-						System.out.println("called");
-					}
-        			
-        		});
-        initialPosition.addInputMethodListener(new InputMethodListener() 
-        		{
-
-					@Override
-					public void inputMethodTextChanged(InputMethodEvent event) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void caretPositionChanged(InputMethodEvent event) {
-						// TODO Auto-generated method stub
-						String text = initialPosition.getText();
-						if (text != null && text.length() != 0)
-						{
-							updater.suggestMove(text);
-						}
-						System.out.println("called");
-					}
-        			
-        		});
+      
+       
         toText = new JTextField();
         toText.setText("  to  ");
+        toText.setEnabled(false);
         finalPosition = new JTextField();
         
         move.add(initialPosition);
@@ -163,28 +153,62 @@ public class Display extends JPanel
         move.add(finalPosition);
         add(move);
         
-        // Set up confirm button
+        // Set up Buttons
+        JPanel buttonPanel = new JPanel();
+        GridLayout buttonGrid = new GridLayout(1, 3);
+        buttonPanel.setLayout(buttonGrid);
+        
+        JButton resetAction = new JButton();
+        resetAction.setText("Reset");
+        JButton displayAction = new JButton();
+        displayAction.setText("Display move");
         confirmAction = new JButton();
-        confirmAction.addActionListener(new ActionListener()
-        		{
+        confirmAction.setText("Confirm Move");
+       
+        confirmAction.addActionListener(confirmActionListener);
+        
+        displayAction.addActionListener(new ActionListener() 
+        {
 
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						String first = initialPosition.getText();
-						String second = finalPosition.getText();
-						updater.sendAction(first, second);
-						initialPosition.setText(null);
-						finalPosition.setText(null);
-					}	
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String text = initialPosition.getText();
+				if (text != null && text.length() != 0)
+				{
+					updater.suggestMove(text);
+				}
+				System.out.println("called");
+			}
         	
-        		});
-        add(confirmAction);
+        });
+        
+        resetAction.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+    			updater.reset();
+    			confirmAction.removeActionListener(confirmActionListener);
+    			confirmAction.addActionListener(confirmActionListener);
+    			System.out.println("reset");
+			}
+			
+		});
+        buttonPanel.add(resetAction);
+        buttonPanel.add(displayAction);
+        buttonPanel.add(confirmAction);
+        add(buttonPanel);
     }
     
     public void updateWinnerState(int winner)
     {
     	this.winner = winner;
+    	if (winner != NONE)
+    	{
+        	confirmAction.removeActionListener(confirmActionListener);    		
+    	}
+    	System.out.println("Updated to " + winner);
     }
     
     @Override 
@@ -195,6 +219,19 @@ public class Display extends JPanel
     	int remainingTurns = updater.getTurnsLeft();
     	currentTurn.setText(currentErrorMessage +  " " + updater.getTurn() + "\'s turn.");
     	turnsLeft.setText(remainingTurns + " turns left.");
+    	switch (winner)
+    	{
+    		case WHITE:
+    			currentTurn.setText("White won!");
+    			break;
+    		case BLACK:
+    			currentTurn.setText("Black won!");
+    			break;
+    		case TIE:
+    			currentTurn.setText("Draw!");
+    			break;
+    	}
+    	
     	pointFields[WHITE].setText("" + currentPoints[WHITE]);
     	pointFields[BLACK].setText("" + currentPoints[BLACK]);
 //    	System.out.println(turnsLeft.getY()+ "    EEEEEEEEEEEEEEEEEEEEEEEEE");

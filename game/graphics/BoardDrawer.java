@@ -32,7 +32,7 @@ public class BoardDrawer extends JComponent
     private static final Color BLACK = new Color(0, 0, 0);
     private static final Color WHITE = new Color(255, 255, 255);
     private static final int MARGIN_RATIO = 40;
-    private static final int NUM_INTERVALS = 8;
+    private static final int NUM_INTERVALS = 9;
     
     public BoardDrawer(Updater u)
     {
@@ -70,14 +70,34 @@ public class BoardDrawer extends JComponent
 //        betterGraphic.drawRect(0, 0, width, height);
         boolean paintDarkTile = false;
         
-        int yStart = margin; 
-        for (int row = 0; row < NUM_INTERVALS; row++)
+        // print the letters
+        int yStart = margin + 3 * heightInterval / 4;
+        int startX = margin * 2 + widthInterval;
+        betterGraphic.setColor(Color.WHITE);
+        for (char col = 'a'; col <= 'h'; col++)
         {
-            int startX = margin;
-            for (int col = 0; col < NUM_INTERVALS; col++)
+        	betterGraphic.drawString(col + "", startX, yStart);
+        	startX += widthInterval;
+        }
+        startX = margin;
+        yStart += heightInterval;
+        for (char row = '1'; row <= '8'; row++)
+        {
+        	betterGraphic.drawString(row + "", startX, yStart);
+        	yStart += heightInterval;
+        }
+        
+        // print the pieces
+        yStart = margin + heightInterval; 
+        for (int row = 1; row < NUM_INTERVALS; row++)
+        {
+            startX = margin + widthInterval;
+            for (int col = 1; col < NUM_INTERVALS; col++)
             {
+            	int effectiveCol = col - 1;
+            	int effectiveRow = row - 1;
                 betterGraphic.setColor((paintDarkTile)? DARK_TILE: LIGHT_TILE);
-                String curPoint = Logic.toCoordinates(col, row);
+                String curPoint = Logic.toCoordinates(effectiveCol, effectiveRow);
                 for (String[] coord: possibleOptions)
                 {
                 	if (coord[0].equals(curPoint))
@@ -88,7 +108,7 @@ public class BoardDrawer extends JComponent
                 }
                 betterGraphic.fillRect(startX, yStart, widthInterval, heightInterval);
                 paintDarkTile = !paintDarkTile;
-                Piece p = updater.getPiece(row, col);
+                Piece p = updater.getPiece(effectiveRow, effectiveCol);
                 if (p != null)
                 {
                 	betterGraphic.setColor(p.getColor().equals(Piece.Color.BLACK)? BLACK: WHITE);
