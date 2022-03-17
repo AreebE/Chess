@@ -81,7 +81,7 @@ public class EncompassingPanel
 				component.invalidate();
 			}
 	
-			System.out.println(component.getWidth() + ", " + component.getHeight() + "; " + component.getClass() + ", " + component.getX());
+// 			System.out.println(component.getWidth() + ", " + component.getHeight() + "; " + component.getClass() + ", " + component.getX());
 		}
 
 		@Override
@@ -132,8 +132,8 @@ public class EncompassingPanel
 
 //        display.addComponentListener(new RatioSetter(2, 1));
 //        display.setSize(new Dimension(200, 400));
-        this.turnsLeft = MAX_TURNS;//////
-        this.isBlackTurn = false; //////
+        this.turnsLeft = MAX_TURNS;
+        this.isBlackTurn = false; 
         c.addComponentListener(new RatioSetter(2, 1));
         setContentPane(c);
     }
@@ -210,7 +210,6 @@ public class EncompassingPanel
             display.invalidate();
             return;
         }
-        p.madeMove();
 		turnsLeft--; 
 
 		boolean inCheckmate = !l.makeMove(firstPos, secondPos, solution[1], display);
@@ -225,7 +224,7 @@ public class EncompassingPanel
 			display.updateWinnerState(winner);
 		}
 		isBlackTurn = !isBlackTurn;
-        board.assignOptions(new String[0][0]); ///////
+        board.assignOptions(new String[0][0]); 
 		display.invalidate();
 		board.invalidate();
 	}
