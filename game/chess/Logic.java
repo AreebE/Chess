@@ -50,6 +50,11 @@ public class Logic
     	
     }
     
+    public static final int MOVE = 0;
+    public static final int EN_PASSENT = 1;
+    public static final int SIMPLE_CAPTURE = 2;
+    public static final int CASTLE = 3;
+    
     private int[] points; /////////////
 
     private Piece[][] board;
@@ -440,12 +445,6 @@ public class Logic
 			int col) 
 	{
 		getCardinalMoves(moves, col, row, color);
-		if (!hasMovedAlready 
-				&& canMakeMove(Type.CASTLE, row, col, color) == POSSIBLE)
-		{
-			int colToMove = (col == Logic.convertToCol('a'))? Logic.convertToCol('c'): Logic.convertToCol('e'); 
-			moves.add(new String[] {Logic.toCoordinates(colToMove, row), Integer.toString(Type.CASTLE.val)});
-		}
 	}
 
 	
@@ -502,7 +501,7 @@ public class Logic
 		// en passant
 		if (
 				(row == Logic.convertToRow('5') && color.equals(Piece.Color.WHITE))
-				|| (row == Logic.convertToRow('3') && color.equals(Piece.Color.BLACK))
+				|| (row == Logic.convertToRow('4') && color.equals(Piece.Color.BLACK))
 			)
 		{
 			possibleMoves = new int[][]
@@ -765,7 +764,8 @@ public class Logic
                 break;
                 
 			case EN_PASSENT:
-				p = getPiece(col - 1, row);
+				int change = (color.equals(Piece.Color.BLACK))? 1: -1;
+				p = getPiece(col, row + change);
                 if (p != null 
                     && !p.getColor().equals(color)
                     && p.getType().equals(Piece.Type.PAWN)
@@ -774,10 +774,10 @@ public class Logic
                 	result = POSSIBLE;
                 	
                 	setPiece(col, row, friendly);
-                	setPiece(col - 1, row, null);
+                	setPiece(col, row + change, null);
                     kingInCheck = isSpotInDanger(color);
                 	setPiece(col, row, null);
-                	setPiece(col - 1, row, p);
+                	setPiece(col, row + change, p);
                 	
                 }
                 break;
@@ -1125,17 +1125,43 @@ public class Logic
      * @param finalSpot the spot to move to
      * @return if the player can make other moves
      */
-    public boolean makeMove(String initSpot, String finalSpot)
+    public boolean makeMove(String initSpot, String finalSpot, String type, PieceTeller teller)
     {
     	Piece moving = getPiece(initSpot);
-        Piece captured = getPiece(finalSpot);
+    	Integer typeOfMove = Integer.parseInt(type);
         Piece.Color currentColor = moving.getColor();
+        moving.madeMove();
+
+    	
+    	int[] captureCoordinates = Logic.toCoordinates(finalSpot);
+    	if (typeOfMove == Type.EN_PASSENT.val)
+    	{
+    		int change = (currentColor.equals(Piece.Color.BLACK))? 1: -1;
+    		captureCoordinates[1] += change;
+    	}
+    	String captureSpot = Logic.toCoordinates(captureCoordinates[1], captureCoordinates[0]);
+    	
+        Piece captured = getPiece(captureSpot);
         if (captured != null)
         {
             points[currentColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING] += captured.getValue();
         }
         placePiece(initSpot, null);
+        placePiece(captureSpot, null);
         placePiece(finalSpot, moving);
+        
+        if (typeOfMove == Type.CASTLE.val)
+        {
+        	int[] initialKingPos = Logic.toCoordinates(initSpot);
+        	int[] finalKingPos = Logic.toCoordinates(finalSpot);
+        	boolean kingInFartherLocation = finalKingPos[1] > initialKingPos[1];
+        	String initialRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('h'): Logic.convertToCol('a'), initialKingPos[0]);
+        	String finalRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('e'): Logic.convertToCol('c'), initialKingPos[0]);
+        	Piece rook = getPiece(initialRookPos);
+        	rook.madeMove();
+        	placePiece(finalRookPos, rook);
+        	placePiece(initialRookPos, null);
+        }
         Piece.Color oppColor = (currentColor.equals(Piece.Color.BLACK)? Piece.Color.WHITE: Piece.Color.BLACK);
         int[] kingCoord = Logic.toCoordinates(kingPositions[oppColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING]);
         ArrayList<int[]> attackerOfKing = isSpotInDanger(kingCoord[0], kingCoord[1], oppColor);

@@ -168,9 +168,10 @@ public class EncompassingPanel
 	public void suggestMove(String start) {
 		// TODO Auto-generated method stub
 		display.sendError(""); 
+		board.assignOptions(new String[0][0]);
         display.invalidate();
 		ArrayList<String[]> options = l.getAllPossibilities(start);
-		System.out.println(start + ", " +l.getPiece(start) + ", " + options.toString());
+//		System.out.println(start + ", " +l.getPiece(start) + ", " + options.toString());
 		
 		if (options != null)
 		{
@@ -179,22 +180,24 @@ public class EncompassingPanel
 				System.out.println("Possibility:" + possibility[0]);
 			}
 			board.assignOptions(options.toArray(new String[options.size()][2]));			
-			board.invalidate();
 		}
+		board.invalidate();
+
 	}
 
 	@Override
 	public void sendAction(String firstPos, String secondPos) {
 		ArrayList<String[]> possibilities = l.getAllPossibilities(firstPos);
-		boolean foundSolution = false;
+		String[] solution = null;
 		for (String[] possibility: possibilities)
 		{
 			if (possibility[0].equals(secondPos))
 			{
-				foundSolution = true;
+				solution = possibility;
+				break;
 			}
 		}
-		if (!foundSolution)
+		if (solution == null)
 		{
 			return;
 		}
@@ -210,7 +213,7 @@ public class EncompassingPanel
         p.madeMove();
 		turnsLeft--; 
 
-		boolean inCheckmate = !l.makeMove(firstPos, secondPos);
+		boolean inCheckmate = !l.makeMove(firstPos, secondPos, solution[1], display);
 		if (inCheckmate)
 		{
 			display.updateWinnerState((isBlackColor)? Display.BLACK: Display.WHITE);

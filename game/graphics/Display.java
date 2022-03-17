@@ -16,7 +16,12 @@ import javax.swing.event.DocumentListener;
 
 import javax.swing.BoxLayout;
 
+import game.chess.Logic;
+import game.chess.Piece;
+import game.chess.Piece.Type;
+
 public class Display extends JPanel
+	implements Logic.PieceTeller
 {
 
 	public static final int NONE = -1;
@@ -39,6 +44,7 @@ public class Display extends JPanel
 			catch (NullPointerException npe)
 			{
 				currentErrorMessage = "Could not make move.";
+				Display.this.invalidate();
 			}
 			initialPosition.setText(null);
 			finalPosition.setText(null);
@@ -66,6 +72,7 @@ public class Display extends JPanel
     private JTextField[] pointFields;
     
     private JPanel move;
+    private JTextField pawnTransform;
     private JTextField initialPosition;
     private JTextField toText;
     private JTextField finalPosition;
@@ -113,33 +120,7 @@ public class Display extends JPanel
         BoxLayout moveInput = new BoxLayout(move, BoxLayout.X_AXIS);
         move.setLayout(moveInput);
         initialPosition = new JTextField();
-        initialPosition.getDocument().addDocumentListener(new DocumentListener()
-        		{
-
-					@Override
-					public void insertUpdate(DocumentEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void removeUpdate(DocumentEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void changedUpdate(DocumentEvent e) {
-						// TODO Auto-generated method stub
-						String text = initialPosition.getText();
-						if (text != null && text.length() != 0)
-						{
-							updater.suggestMove(text);
-						}
-						System.out.println("called");
-					}
-        	
-        		});
+       
         
       
        
@@ -195,9 +176,20 @@ public class Display extends JPanel
 			}
 			
 		});
+        
+        JTextField pawnInfo = new JTextField("Transform pawn to:");
+        pawnInfo.setEnabled(false);
+        pawnTransform = new JTextField("Queen");
+        JPanel pawnPanel = new JPanel();
+        GridLayout pawnGrid = new GridLayout(2, 1);
+        pawnPanel.setLayout(pawnGrid);
+        pawnPanel.add(pawnInfo);
+        pawnPanel.add(pawnTransform);
+        
         buttonPanel.add(resetAction);
         buttonPanel.add(displayAction);
         buttonPanel.add(confirmAction);
+        buttonPanel.add(pawnPanel);
         add(buttonPanel);
     }
     
@@ -241,5 +233,32 @@ public class Display extends JPanel
     {
         currentErrorMessage = message;
     }
+
+	@Override
+	public Piece.Type askWhatToTransformTo() {
+		try 
+		{
+			switch(currentErrorMessage.charAt(0))
+			{
+				case 'R':
+				case 'r':
+					return Piece.Type.ROOK;
+				case 'B':
+				case 'b':
+					return Piece.Type.BISHOP;
+				case 'k':
+				case 'K':
+					return Piece.Type.KNIGHT;
+				case 'q':
+				case 'Q':
+				default:
+					return Piece.Type.QUEEN;
+			}
+		}
+		catch (NullPointerException npe)
+		{
+			return Piece.Type.QUEEN;
+		}
+	}
     
 }

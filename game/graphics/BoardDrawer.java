@@ -3,6 +3,7 @@ package game.graphics;
 import game.chess.Piece;
 import javax.swing.JComponent;
 import java.awt.Graphics2D;
+import java.util.HashMap;
 import java.awt.Graphics;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -23,12 +24,20 @@ public class BoardDrawer extends JComponent
 		public Piece getPiece(int row, int col);
 	}
 	
-	private String[][] possibleOptions;
+//	private String[][] possibleOptions;
 	private Updater updater;
+	private HashMap<String, Integer> possibleOptions;
 
     private static final Color LIGHT_TILE = new Color(255, 214, 166);
     private static final Color DARK_TILE = new Color(183, 134, 78);
-    private static final Color SELECTED = new Color(120, 183, 87);
+    private static final Color MOVE_DARK = new Color(120, 183, 87);
+    private static final Color MOVE_LIGHT = new Color(180, 233, 137);
+    private static final Color ATTACK_LIGHT = new Color(231, 87, 87);
+    private static final Color ATTACK_DARK = new Color(159, 20, 20);
+    private static final Color PASSENT_LIGHT = new Color(236, 126, 223);
+    private static final Color PASSENT_DARK = new Color(160, 11, 143);
+    private static final Color CASTLE_LIGHT = new Color(145, 202, 240);
+    private static final Color CASTLE_DARK = new Color(28, 128, 195);
     private static final Color BLACK = new Color(0, 0, 0);
     private static final Color WHITE = new Color(255, 255, 255);
     private static final int MARGIN_RATIO = 40;
@@ -40,12 +49,16 @@ public class BoardDrawer extends JComponent
 //    	this.setBorder(border);
         // ee
     	this.updater = u;
-    	possibleOptions = new String[0][0];
+    	possibleOptions = new HashMap<>();
     }
 
     public void assignOptions(String[][] options)
     {
-    	this.possibleOptions = options;
+    	possibleOptions.clear();
+    	for (String[] possibility: options)
+    	{
+    		possibleOptions.put(possibility[0], Integer.parseInt(possibility[1]));
+    	}
     }
 
     @Override 
@@ -98,14 +111,29 @@ public class BoardDrawer extends JComponent
             	int effectiveRow = row - 1;
                 betterGraphic.setColor((paintDarkTile)? DARK_TILE: LIGHT_TILE);
                 String curPoint = Logic.toCoordinates(effectiveCol, effectiveRow);
-                for (String[] coord: possibleOptions)
+                if (possibleOptions.containsKey(curPoint))
                 {
-                	if (coord[0].equals(curPoint))
+                	switch(possibleOptions.get(curPoint))
                 	{
-                		betterGraphic.setColor(SELECTED);
-                		break;
+                		case Logic.MOVE:
+                			betterGraphic.setColor((paintDarkTile)? MOVE_DARK: MOVE_LIGHT);
+                			break;
+                			
+                		case Logic.SIMPLE_CAPTURE:
+                			betterGraphic.setColor((paintDarkTile)? ATTACK_DARK: ATTACK_LIGHT);
+                			break;
+                			
+                		case Logic.EN_PASSENT:
+                			betterGraphic.setColor((paintDarkTile)? PASSENT_DARK: PASSENT_LIGHT);
+                			break;
+                			
+                		case Logic.CASTLE:
+                			betterGraphic.setColor((paintDarkTile)? CASTLE_DARK: CASTLE_LIGHT);
+                			break;
+                		
                 	}
                 }
+                
                 betterGraphic.fillRect(startX, yStart, widthInterval, heightInterval);
                 paintDarkTile = !paintDarkTile;
                 Piece p = updater.getPiece(effectiveRow, effectiveCol);
