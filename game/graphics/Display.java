@@ -238,7 +238,7 @@ public class Display extends JPanel
 	public Piece.Type askWhatToTransformTo() {
 		try 
 		{
-			switch(currentErrorMessage.charAt(0))
+			switch(pawnTransform.getText().charAt(0))
 			{
 				case 'R':
 				case 'r':
@@ -255,7 +255,7 @@ public class Display extends JPanel
 					return Piece.Type.QUEEN;
 			}
 		}
-		catch (NullPointerException npe)
+		catch (NullPointerException | IndexOutOfBoundsException npe)
 		{
 			return Piece.Type.QUEEN;
 		}
