@@ -748,6 +748,7 @@ public class Logic
         Piece friendly = (color.equals(Piece.Color.WHITE))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
 		boolean kingInCheck = false;
 		int result = IMPOSSIBLE;
+		int change; ////////////////
         switch (typeOfMove)
 		{
 			case MOVE:
@@ -764,8 +765,10 @@ public class Logic
                 break;
                 
 			case EN_PASSENT:
-				int change = (color.equals(Piece.Color.BLACK))? 1: -1;
+				change = (color.equals(Piece.Color.BLACK))? 1: -1; ////////////////
 				p = getPiece(col, row + change);
+				System.out.println("Checking " + Logic.toCoordinates(col, row + change) + " for en passent" );
+				System.out.println((p == null)? "No pawn here": "Pawn is color " + p.getColor() + " and has made " + p.getMovesMade());
                 if (p != null 
                     && !p.getColor().equals(color)
                     && p.getType().equals(Piece.Type.PAWN)
@@ -798,7 +801,7 @@ public class Logic
                 
 			case CASTLE:
 				int startCol = convertToCol('a');
-                int change = 1;
+                change = 1; ////////////
                 boolean onLeftSide = col == convertToCol('a');
                 if (!onLeftSide)
                 {
@@ -909,7 +912,7 @@ public class Logic
 			}
 		}
 		
-		int change = (color.equals(Piece.Color.BLACK))? 1: -1;
+		int change = (color.equals(Piece.Color.BLACK))? -1: 1; ////////
 		int[][] pawnAttacks = new int[][]
 				{
 					{row + change, col + 1},
@@ -1001,12 +1004,10 @@ public class Logic
 	private boolean inCheckmate(Piece.Color color, int[] checkingPieceCoord)
 	{
 		System.out.println(Arrays.toString(kingPositions));
-        //////////
         String chosenKing = kingPositions[(color.equals(Piece.Color.BLACK))? BLACK_KING: WHITE_KING];
 		int[] kingCoord = Logic.toCoordinates(chosenKing);
         ArrayList<String[]> kingMovements = getAllPossibilities(chosenKing);
         if (kingMovements == null || kingMovements.size() == 0)
-            /////////
 		{
 			int rowChange = kingCoord[0] < checkingPieceCoord[0] ? 1 : (kingCoord[0] == checkingPieceCoord[0]? 0: -1);
 			int colChange = kingCoord[1] < checkingPieceCoord[1] ? 1 : (kingCoord[1] == checkingPieceCoord[1]? 0: -1);
@@ -1020,7 +1021,7 @@ public class Logic
 					{
 						if (canBlockSpot(currentSpot, color))
 						{
-							return true;
+							return false; /////
 						}
 						currentSpot[0] += rowChange;
 						currentSpot[1] += colChange;
@@ -1031,12 +1032,12 @@ public class Logic
 				case PAWN:
 					if (canBlockSpot(checkingPieceCoord, color))
 					{
-						return false;
+						return false; ////////
 					}
-					break;
+					return true; //////
 			}
 		}
-		return true;
+		return false; //////
 	}
 	
 	/**
@@ -1125,22 +1126,27 @@ public class Logic
      * @param finalSpot the spot to move to
      * @return if the player can make other moves
      */
+    ////////////
     public boolean makeMove(String initSpot, String finalSpot, String type, PieceTeller teller)
     {
+    	// initial preparation
     	Piece moving = getPiece(initSpot);
     	Integer typeOfMove = Integer.parseInt(type);
         Piece.Color currentColor = moving.getColor();
         moving.madeMove();
 
     	
+        // Getting the capture coordinatse
     	int[] captureCoordinates = Logic.toCoordinates(finalSpot);
     	if (typeOfMove == Type.EN_PASSENT.val)
     	{
     		int change = (currentColor.equals(Piece.Color.BLACK))? 1: -1;
-    		captureCoordinates[1] += change;
+    		captureCoordinates[0] += change; ////////
     	}
     	String captureSpot = Logic.toCoordinates(captureCoordinates[1], captureCoordinates[0]);
+    	System.out.println(captureSpot);
     	
+    	// Seeing the captured piece, then placing some numm pieces
         Piece captured = getPiece(captureSpot);
         if (captured != null)
         {
@@ -1148,8 +1154,19 @@ public class Logic
         }
         placePiece(initSpot, null);
         placePiece(captureSpot, null);
+        
+        //moving the initial piece
+        if (moving.getType().equals(Piece.Type.PAWN) && 
+        		(
+        				(currentColor.equals(Piece.Color.BLACK) && finalSpot.charAt(1) == '1')
+        				|| (currentColor.equals(Piece.Color.WHITE)) && finalSpot.charAt(1) == '8')
+        		)
+        {
+        	moving.setType(teller.askWhatToTransformTo());
+        }
         placePiece(finalSpot, moving);
         
+        // check for castle
         if (typeOfMove == Type.CASTLE.val)
         {
         	int[] initialKingPos = Logic.toCoordinates(initSpot);
@@ -1162,9 +1179,12 @@ public class Logic
         	placePiece(finalRookPos, rook);
         	placePiece(initialRookPos, null);
         }
+        
+        //check if other king is in check.
         Piece.Color oppColor = (currentColor.equals(Piece.Color.BLACK)? Piece.Color.WHITE: Piece.Color.BLACK);
         int[] kingCoord = Logic.toCoordinates(kingPositions[oppColor.equals(Piece.Color.BLACK)? BLACK_KING: WHITE_KING]);
         ArrayList<int[]> attackerOfKing = isSpotInDanger(kingCoord[0], kingCoord[1], oppColor);
         return (attackerOfKing.size() == 0)? true: !inCheckmate(oppColor, attackerOfKing.get(0));
     }
+    //////////
 }
