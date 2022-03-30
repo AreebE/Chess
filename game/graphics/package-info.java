@@ -1,1 +1,1 @@
-package game.graphics;
+package graphics;

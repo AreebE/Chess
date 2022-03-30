@@ -1,4 +1,4 @@
-package game.chess;
+package chess2;
 
 /**
      * 
@@ -26,7 +26,7 @@ public class Piece
 
         private final int value;
 
-        /*
+        /**
         * Creates a piece type.
         *
         * @param    value   the value of that piece when captured.
@@ -36,7 +36,7 @@ public class Piece
             this.value = value;
         }
 
-        /*
+        /**
         * @return   the value of the piece
         */
         public int getValue()
@@ -123,11 +123,19 @@ public class Piece
         movesMade++;
     }
     
+    /**
+     * Get how many moves were made so far
+     * @return the number of moves this piece has made
+     */
     public int getMovesMade()
     {
     	return movesMade;
     }
     
+    /**
+     * Get the value of this piece
+     * @return the value
+     */
     public int getValue()
     {
         return type.getValue();

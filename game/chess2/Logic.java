@@ -1,10 +1,11 @@
-package game.chess;
+package chess2;
 
 import java.lang.IndexOutOfBoundsException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import game.chess.Piece.Color;
+import chess2.Piece.Color;
+import chess2.Piece.Type;
 
 public class Logic 
 {
@@ -24,10 +25,15 @@ public class Logic
     private static final int KING_IN_CHECK = 2;
 
     
+    /**
+     * A interface to get the name of the piece to transform a pawn into once it reaches the end of the board.
+     *
+     */
     public interface PieceTeller 
     {
     	public Piece.Type askWhatToTransformTo();
     }
+    
     /**
      * 
      * @author Areeb Emran
@@ -151,7 +157,7 @@ public class Logic
         }
         catch (IndexOutOfBoundsException | NullPointerException tme)
         {
-            System.out.println("Could not place piece. " + tme.toString());
+//            System.out.println("Could not place piece. " + tme.toString());
         }
     }
 

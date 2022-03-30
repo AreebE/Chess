@@ -1,14 +1,15 @@
-package game.graphics;
+package graphics;
 
 import javax.swing.JPanel;
 
-import game.chess.Logic;
-import game.chess.Piece;
+import chess2.Logic;
+import chess2.Piece;
 
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.awt.Component;
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -19,6 +20,10 @@ import java.awt.Container;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 
+/**
+ * A large encompassing panel, containing the display and the board.
+ *
+ */
 public class EncompassingPanel 
 		extends JFrame
 		implements Display.Updater,
@@ -31,6 +36,10 @@ public class EncompassingPanel
 	private BoardDrawer board;
 	private Display display;
 	
+	/**
+	 * A ratio setter, used to adjust the size of this component. However, this won't be used anymore.
+	 *
+	 */
 	private class RatioSetter implements ComponentListener 
 	{
 		private static final double MARGIN_OF_ERROR = 0.003; 
@@ -50,7 +59,11 @@ public class EncompassingPanel
 			this.denominator = den;
 		}
 		
-		// width / height = ratio
+		/**
+		 *  Resize the component
+		 *  @param e some event, I'm not sure what it does. Either way, the only purpose of this is to get the component to adjust.
+		 *   width / height = ratio
+		 */
 		@Override
 		public void componentResized(ComponentEvent e) {
 			// TODO Auto-generated method stub
@@ -104,7 +117,13 @@ public class EncompassingPanel
 		
 	}
 	
-    public EncompassingPanel()
+	/**
+	 * A public constructor, simply creating the object.
+	 * @param fileName the file for the images
+	 * @param whites the boundaries for the white pieces
+	 * @param blacks the boundaries for the black pieces.
+	 */
+    public EncompassingPanel(String fileName, HashMap<Piece.Type, Integer[]> whites, HashMap<Piece.Type, Integer[]> blacks)
     {
         super("Chess Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -113,7 +132,7 @@ public class EncompassingPanel
 //        BoxLayout f = new BoxLayout(c, BoxLayout.X_AXIS);
 //        FlowLayout f = new FlowLayout(FlowLayout.CENTER);
         c.setLayout(f);
-        board = new BoardDrawer(this);
+        board = new BoardDrawer(this, fileName, whites, blacks);
         display = new Display(this);
         l = new Logic();
 //        board.setSize(new Dimension(400, 400));
@@ -138,23 +157,42 @@ public class EncompassingPanel
         setContentPane(c);
     }
 
+    /**
+     * Get the piece at a given position
+     *  
+     * @param row the row to get
+     * @param col the column to get 
+     * @return the piece
+     */
 	@Override
 	public Piece getPiece(int row, int col) {
 		return l.getPiece(col, row);
 	}
-
+	
+	/**
+	 * Get the current turn
+	 * @return the current turn
+	 */
 	@Override
 	public String getTurn() {
 		// TODO Auto-generated method stub
 		return (isBlackTurn)? "Black": "White";
 	}
-
+	
+	/**
+	 * Get how many turns are left
+	 * @return the turns left
+	 */
 	@Override
 	public int getTurnsLeft() {
 		// TODO Auto-generated method stub
 		return turnsLeft;
 	}
-
+	
+	/**
+	 * get the points that belong to each side.
+	 * @return the number of points each side has.
+	 */
 	@Override
 	public int[] getPoints() {
 		// TODO Auto-generated method stub
@@ -164,6 +202,10 @@ public class EncompassingPanel
 		return points;
 	}
 
+	/**
+	 * called when a move needs to be suggested, which will also update the board.
+	 * @param start the position to check for moves from.
+	 */
 	@Override
 	public void suggestMove(String start) {
 		// TODO Auto-generated method stub
@@ -177,7 +219,7 @@ public class EncompassingPanel
 		{
 			for (String[] possibility: options)
 			{
-				System.out.println("Possibility:" + possibility[0]);
+//				System.out.println("Possibility:" + possibility[0]);
 			}
 			board.assignOptions(options.toArray(new String[options.size()][2]));			
 		}
@@ -185,6 +227,12 @@ public class EncompassingPanel
 
 	}
 
+	/**
+	 * Perform an action and update what is necessary. 
+	 *  
+	 * @param firstPos the position to move from
+	 * @param secondPos the position to move to
+	 */
 	@Override
 	public void sendAction(String firstPos, String secondPos) {
 		ArrayList<String[]> possibilities = l.getAllPossibilities(firstPos);
@@ -229,6 +277,9 @@ public class EncompassingPanel
 		board.invalidate();
 	}
 
+	/**
+	 * Reset the the whole game, if needed.
+	 */
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub

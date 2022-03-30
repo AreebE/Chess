@@ -1,14 +1,36 @@
+package main;
 
-import game.chess.Logic;
-import game.chess.Piece;
+import chess2.Logic;
+import chess2.Piece;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.lang.Runnable;
 import javax.swing.SwingUtilities;
-import game.graphics.EncompassingPanel;
-
+import graphics.EncompassingPanel;
+//import game
 class Main {
+	
+	private static HashMap<Piece.Type, Integer[]> whites = new HashMap<Piece.Type, Integer[]>()
+	{{
+		this.put(Piece.Type.ROOK, new Integer[] {0, 5, 80, 85});
+		this.put(Piece.Type.KNIGHT, new Integer[] {85, 5, 170, 85});
+		this.put(Piece.Type.BISHOP, new Integer[] {177, 5, 253, 85});
+		this.put(Piece.Type.KING, new Integer[] {262, 5, 342, 85});
+		this.put(Piece.Type.QUEEN, new Integer[] {347, 5, 427, 85});
+		this.put(Piece.Type.PAWN, new Integer[] {527, 9, 607, 89});
+	}};
+	
+	private static HashMap<Piece.Type, Integer[]> blacks = new HashMap<Piece.Type, Integer[]>()
+	{{
+		this.put(Piece.Type.ROOK, new Integer[] {0, 104, 80, 184});
+		this.put(Piece.Type.KNIGHT, new Integer[] {85, 104, 170, 184});
+		this.put(Piece.Type.BISHOP, new Integer[] {177, 104, 253, 184});
+		this.put(Piece.Type.KING, new Integer[] {262, 104, 342, 184});
+		this.put(Piece.Type.QUEEN, new Integer[] {347, 104, 427, 184});
+		this.put(Piece.Type.PAWN, new Integer[] {527, 96, 607, 186});
+	}};
   public static void main(String[] args) {
     System.out.println("Hello world!");
 //    debugLogic();
@@ -88,8 +110,9 @@ class Main {
                   @Override
                   public void run()
                   {
-                      EncompassingPanel panel = new EncompassingPanel();
+                      EncompassingPanel panel = new EncompassingPanel("res/cropped.png", whites, blacks);
                       panel.pack();
+//                      panel.setSize.
                       panel.setVisible(true);
                   }
               });

@@ -1,4 +1,4 @@
-package game.graphics;
+package graphics;
 
 import javax.swing.JTextField;
 import javax.swing.JButton;
@@ -16,10 +16,14 @@ import javax.swing.event.DocumentListener;
 
 import javax.swing.BoxLayout;
 
-import game.chess.Logic;
-import game.chess.Piece;
-import game.chess.Piece.Type;
+import chess2.Logic;
+import chess2.Piece;
+import chess2.Piece.Type;
 
+/**
+ * The method used to display some settings important to the user.
+ *
+ */
 public class Display extends JPanel
 	implements Logic.PieceTeller
 {
@@ -52,6 +56,10 @@ public class Display extends JPanel
 		}
 	};
 	
+	/**
+	 * An updater to allow this class to access certain information
+	 * 	
+	 */
 	public interface Updater 
 	{
 		public String getTurn();
@@ -79,6 +87,10 @@ public class Display extends JPanel
     private JButton confirmAction;
 
 	
+    /**
+     * A display method that sets up all of the individual components.
+     * @param u the updater to change information.
+     */
     public Display(Updater u)
     {
     	this.updater = u;
@@ -158,7 +170,7 @@ public class Display extends JPanel
 				{
 					updater.suggestMove(text);
 				}
-				System.out.println("called");
+//				System.out.println("called");
 			}
         	
         });
@@ -172,7 +184,7 @@ public class Display extends JPanel
     			updater.reset();
     			confirmAction.removeActionListener(confirmActionListener);
     			confirmAction.addActionListener(confirmActionListener);
-    			System.out.println("reset");
+//    			System.out.println("reset");
 			}
 			
 		});
@@ -193,6 +205,10 @@ public class Display extends JPanel
         add(buttonPanel);
     }
     
+    /**
+     * Updating the winner state
+     * @param winner the integer that represents a runner
+     */
     public void updateWinnerState(int winner)
     {
     	this.winner = winner;
@@ -200,9 +216,12 @@ public class Display extends JPanel
     	{
         	confirmAction.removeActionListener(confirmActionListener);    		
     	}
-    	System.out.println("Updated to " + winner);
+//    	System.out.println("Updated to " + winner);
     }
     
+    /**
+     * Overriding the invalidate method, also updating some of the displays.
+     */
     @Override 
     public void invalidate()
     {
@@ -229,11 +248,19 @@ public class Display extends JPanel
 //    	System.out.println(turnsLeft.getY()+ "    EEEEEEEEEEEEEEEEEEEEEEEEE");
     }
     
+    /**
+     * Send an error to this class
+     * @param message the error message
+     */
     public void sendError(String message)
     {
         currentErrorMessage = message;
     }
-
+    
+    /**
+     * The method for getting the type of piece to transform to.
+     * @return the type of piece.
+     */
 	@Override
 	public Piece.Type askWhatToTransformTo() {
 		try 

@@ -1,8 +1,16 @@
-package game.graphics;
+package graphics;
 
-import game.chess.Piece;
+import chess2.Logic;
+import chess2.Piece;
+
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.awt.Graphics;
 import java.awt.BasicStroke;
@@ -11,14 +19,22 @@ import java.awt.Font;
 
 import javax.swing.border.EmptyBorder;
 
-import game.chess.Logic;
-import game.chess.Piece;
-// Chess Piece Res:
-// https://www.freepnglogos.com/images/chess-39335.html 
-
+/**
+ * The class used to draw a board.
+ *
+ */
 public class BoardDrawer extends JComponent
 {
 	
+	
+	private BufferedImage img;
+	private HashMap<Piece.Type, Integer[]> whiteBoundaries;
+	private HashMap<Piece.Type, Integer[]> blackBoundaries;
+
+	/**
+	 * A interface used to update pieces.
+	 *
+	 */
 	public interface Updater 
 	{
 		public Piece getPiece(int row, int col);
@@ -43,15 +59,37 @@ public class BoardDrawer extends JComponent
     private static final int MARGIN_RATIO = 40;
     private static final int NUM_INTERVALS = 9;
     
-    public BoardDrawer(Updater u)
+    /**
+     * The basic constructor for a board drawer.
+     * @param u the updater used, which is where this class will get the name of pieces from.
+     * @param imgName the file name of the image.
+     * @param whites the hashmap containing the boundaries for the white pieces. Must be in the order of left, top, right, down.
+     * @param blacks same as whites, but for black pieces. Same restrictions apply.
+     */
+    public BoardDrawer(Updater u, String imgName, HashMap<Piece.Type, Integer[]> whites, HashMap<Piece.Type, Integer[]> blacks)
     {
 //    	EmptyBorder border = new EmptyBorder(1, 1, 1, 1);
 //    	this.setBorder(border);
         // ee
     	this.updater = u;
+    	try {
+//    		System.out.println(imgName);
+    		
+			this.img = ImageIO.read(new File(imgName));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	this.whiteBoundaries = whites;
+    	this.blackBoundaries = blacks;
     	possibleOptions = new HashMap<>();
     }
-
+    
+    /**
+     * Assign the movement options for a given piece.
+     * 
+     * @param options a 2D string array, where each row has 2 columns: the first is the place to select, the second is the type of move.
+     */
     public void assignOptions(String[][] options)
     {
     	possibleOptions.clear();
@@ -61,6 +99,11 @@ public class BoardDrawer extends JComponent
     	}
     }
 
+    /**
+     * The method used for painting what the board looks like.
+     * 
+     * @param g the graphics to draw on.
+     */
     @Override 
     public void paint(Graphics g)
     {
@@ -79,11 +122,11 @@ public class BoardDrawer extends JComponent
         betterGraphic.setColor(Color.BLACK);
         betterGraphic.fillRect(0, 0, width, height);
 //        System.out.println(this.getBorder().getBorderInsets(this));
-        System.out.println("\n__________________________________\n" + width + " ; " + height + " - " + margin);
+//        System.out.println("\n__________________________________\n" + width + " ; " + height + " - " + margin);
 //        betterGraphic.drawRect(0, 0, width, height);
         boolean paintDarkTile = false;
         
-        // print the letters
+        // print the letters for columns and rows
         int yStart = margin + 3 * heightInterval / 4;
         int startX = margin * 2 + widthInterval;
         betterGraphic.setColor(Color.WHITE);
@@ -100,7 +143,7 @@ public class BoardDrawer extends JComponent
         	yStart += heightInterval;
         }
         
-        // print the pieces
+        // print the movements, squares, and pieces
         yStart = margin + heightInterval; 
         for (int row = 1; row < NUM_INTERVALS; row++)
         {
@@ -109,6 +152,7 @@ public class BoardDrawer extends JComponent
             {
             	int effectiveCol = col - 1;
             	int effectiveRow = row - 1;
+            	// print background of squares
                 betterGraphic.setColor((paintDarkTile)? DARK_TILE: LIGHT_TILE);
                 String curPoint = Logic.toCoordinates(effectiveCol, effectiveRow);
                 if (possibleOptions.containsKey(curPoint))
@@ -136,33 +180,38 @@ public class BoardDrawer extends JComponent
                 
                 betterGraphic.fillRect(startX, yStart, widthInterval, heightInterval);
                 paintDarkTile = !paintDarkTile;
+                // print piece
                 Piece p = updater.getPiece(effectiveRow, effectiveCol);
                 if (p != null)
                 {
-                	betterGraphic.setColor(p.getColor().equals(Piece.Color.BLACK)? BLACK: WHITE);
-                	String letter = "";
-                	switch (p.getType())
+//                	betterGraphic.setColor(p.getColor().equals(Piece.Color.BLACK)? BLACK: WHITE);
+//                	String letter = "";
+                	Integer[] boundaries;
+                	if (p.getColor().equals(Piece.Color.BLACK))
                 	{
-                		case PAWN:
-                			letter = "p";
-                			break;
-                		case ROOK:
-                			letter = "R";
-                			break;
-                		case KNIGHT:
-                			letter = "H";
-                			break;
-                		case BISHOP:
-                			letter = "B";
-                			break;
-                		case QUEEN:
-                			letter = "Q";
-                			break;
-                		case KING:
-                			letter = "K";
-                			break;
+                		boundaries = blackBoundaries.get(p.getType());
                 	}
-                	betterGraphic.drawString(letter, startX + margin, yStart + heightInterval - 3 / 2 * margin);
+                	else 
+                	{
+                		boundaries = whiteBoundaries.get(p.getType());
+                	}
+//                	System.out.println(img + ", " + boundaries[0] + ", " + boundaries[1] + ", " + boundaries[2] + ", " + boundaries[3]);
+//                	System.out.println(startX + ", " + yStart);
+                	betterGraphic.drawImage
+                			(
+	                			img, 
+	                			startX, 
+	                			yStart, 
+	                			startX + widthInterval, 
+	                			yStart + heightInterval,
+	                			boundaries[0], 
+	                			boundaries[1], 
+	                			boundaries[2], 
+	                			boundaries[3], 
+	                			this
+                			);
+//                	betterGraphic.drawImage(img, startX, yStart, widthInterval, heightInterval, this);
+//                	betterGraphic.drawString(letter, startX + margin, yStart + heightInterval - 3 / 2 * margin);
                 }
                 startX += widthInterval;
             }
@@ -172,6 +221,9 @@ public class BoardDrawer extends JComponent
         }
     }
     
+    /**
+     * Overriding the invalidating method to remind this method to repaint this component.
+     */
     @Override 
     public void invalidate()
     {
