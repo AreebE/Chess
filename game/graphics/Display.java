@@ -5,6 +5,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import java.awt.Color;
+import java.awt.Font;
+
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -101,10 +103,18 @@ public class Display extends JPanel
     	
         currentTurn = new JTextField();
         currentTurn.setEnabled(false);
+	
+	currentTurn.setDisabledTextColor(new Color(0, 0, 0));
+        currentTurn.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+        
         add(currentTurn);
         
         turnsLeft = new JTextField();
         turnsLeft.setEnabled(false);
+	
+	turnsLeft.setDisabledTextColor(new Color(0, 0, 0));
+        turnsLeft.setFont(new Font(Font.SERIF, Font.ITALIC|Font.BOLD ,20));
+        
         add(turnsLeft);
         this.currentErrorMessage = "";
 
@@ -124,6 +134,13 @@ public class Display extends JPanel
         pointFields = new JTextField[] {new JTextField(), new JTextField()};
         pointFields[0].setEnabled(false);
         pointFields[1].setEnabled(false);
+	
+	 pointFields[0].setDisabledTextColor(new Color(0, 0, 0));
+        pointFields[0].setFont(new Font(Font.SERIF, Font.PLAIN, 15));
+	pointFields[1].setDisabledTextColor(new Color(0, 0, 0));
+        pointFields[1].setFont(new Font(Font.SERIF, Font.PLAIN, 15));
+       
+        
         points.add(pointFields[0]);
         points.add(pointFields[1]);
         add(points);
@@ -133,13 +150,21 @@ public class Display extends JPanel
         move.setLayout(moveInput);
         initialPosition = new JTextField();
        
-        
+        initialPosition.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 20));
+
       
        
         toText = new JTextField();
         toText.setText("  to  ");
         toText.setEnabled(false);
+	
+	toText.setDisabledTextColor(new Color(0, 0, 0));
+        toText.setFont(new Font(Font.SERIF, Font.BOLD, 20));
+        
         finalPosition = new JTextField();
+	
+	finalPosition.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 20));
+
         
         move.add(initialPosition);
         move.add(toText);
