@@ -1009,7 +1009,7 @@ public class Logic
 	 */
 	private boolean inCheckmate(Piece.Color color, int[] checkingPieceCoord)
 	{
-		System.out.println(Arrays.toString(kingPositions));
+//		System.out.println(Arrays.toString(kingPositions));
         String chosenKing = kingPositions[(color.equals(Piece.Color.BLACK))? BLACK_KING: WHITE_KING];
 		int[] kingCoord = Logic.toCoordinates(chosenKing);
         ArrayList<String[]> kingMovements = getAllPossibilities(chosenKing);
@@ -1017,22 +1017,26 @@ public class Logic
 		{
 			int rowChange = kingCoord[0] < checkingPieceCoord[0] ? 1 : (kingCoord[0] == checkingPieceCoord[0]? 0: -1);
 			int colChange = kingCoord[1] < checkingPieceCoord[1] ? 1 : (kingCoord[1] == checkingPieceCoord[1]? 0: -1);
+//			System.out.println("checking " + checkingPieceCoord[2] + ", " + rowChange + "; " + colChange);
+
 			switch(checkingPieceCoord[2])
 			{
 				case CARDINAL:
 				case DIAGONAL:
 					int[] currentSpot = new int[] {kingCoord[0] + rowChange, kingCoord[1] + colChange};
+
 					while (currentSpot[0] != checkingPieceCoord[0] 
-							&& currentSpot[1] != checkingPieceCoord[1])
+							|| currentSpot[1] != checkingPieceCoord[1])
 					{
 						if (canBlockSpot(currentSpot, color))
 						{
+
 							return false; /////
 						}
 						currentSpot[0] += rowChange;
 						currentSpot[1] += colChange;
+
 					}					
-					
 				case KING:
 				case KNIGHT:
 				case PAWN:
@@ -1056,6 +1060,11 @@ public class Logic
 	{
 		ArrayList<int[]> coordinatesOfAttackers = this.isSpotInDanger(coord[0], coord[1], c) ;
 		String spot = Logic.toCoordinates(coord[1], coord[0]);
+//		System.out.println(spot);
+//		for (int[] coords: coordinatesOfAttackers)
+//		{
+//			System.out.println(Logic.toCoordinates(coord[1], coord[0]));
+//		}
 		for (int[] attacker: coordinatesOfAttackers)
 		{
 			ArrayList<String[]> possibilities = getAllPossibilities(Logic.toCoordinates(attacker[1], attacker[0]));
