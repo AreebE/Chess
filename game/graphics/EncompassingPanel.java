@@ -153,7 +153,7 @@ public class EncompassingPanel
 //        display.setSize(new Dimension(200, 400));
         this.turnsLeft = MAX_TURNS;
         this.isBlackTurn = false; 
-        c.addComponentListener(new RatioSetter(2, 1));
+//        c.addComponentListener(new RatioSetter(2, 1));
         setContentPane(c);
     }
 
@@ -271,6 +271,7 @@ public class EncompassingPanel
 			int winner = (whitePoints > blackPoints)? Display.WHITE: (blackPoints > whitePoints)? Display.BLACK: Display.TIE;
 			display.updateWinnerState(winner);
 		}
+		System.out.println(l.toString());
 		isBlackTurn = !isBlackTurn;
         board.assignOptions(new String[0][0]); 
 		display.invalidate();

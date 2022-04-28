@@ -9,6 +9,14 @@ import chess2.Piece.Type;
 
 public class Logic 
 {
+	
+	public static final char KNIGHT_CHAR = 'N';
+	public static final char ROOK_CHAR = 'R';
+	public static final char BISHOP_CHAR = 'B';
+	public static final char QUEEN_CHAR = 'Q';
+	public static final char KING_CHAR = 'K';
+	public static final char PAWN_CHAR = 'P';
+	
     private static final Piece WHITE_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.WHITE);
     private static final Piece BLACK_PLACEHOLDER = new Piece(Piece.Type.PAWN, Piece.Color.BLACK);
     private static final int SIZE = 8;
@@ -167,15 +175,61 @@ public class Logic
      */
     public String toString()
     {
-        for (int row = 0; row < SIZE; row++)
+        StringBuilder boardLayout = new StringBuilder();
+        for (int row = 0; row < 8; row++)
         {
-            for (int col = 0; col < SIZE; col++)
-            {
-                Piece piece = getPiece(col, row);
-                System.out.println(toCoordinates(col, row) + " has " + ((piece == null)? "nothing": piece.toString()));
-            }
+        	for (int col = 0; col < 8; col++)
+        	{
+        		Piece current = this.getPiece(col, row);
+        		char pieceChar = '0';
+        		if (current == null)
+        		{
+        	
+        			while (current == null && col < 8)
+        			{
+        				col++;
+        				current = this.getPiece(col, row);
+        				pieceChar++;
+        			}
+        			boardLayout.append(pieceChar);
+        			if (col == 8)
+        			{
+        				continue;
+        			}
+        		}
+        		switch(current.getType())
+        		{
+        			case QUEEN:
+        				pieceChar = this.QUEEN_CHAR;
+        				break;
+        			case BISHOP:
+        				pieceChar = this.BISHOP_CHAR;
+        				break;
+        			case KING:
+        				pieceChar = this.KING_CHAR;
+        				break;
+        			case PAWN:
+        				pieceChar = this.PAWN_CHAR;
+        				break;
+        			case ROOK:
+        				pieceChar = this.ROOK_CHAR;
+        				break;
+        			case KNIGHT:
+        				pieceChar = this.KNIGHT_CHAR;
+        				break;
+        		}
+        		if (current.getColor().equals(Piece.Color.BLACK))
+        		{
+        			pieceChar = Character.toLowerCase(pieceChar);
+        		}
+        		boardLayout.append(pieceChar);
+        	}
+        	if (row <= 7)
+        	{
+        		boardLayout.append("/");
+        	}
         }
-        return "";
+        return boardLayout.toString();
     }
 
     /**
