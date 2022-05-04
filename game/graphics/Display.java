@@ -97,6 +97,12 @@ public class Display extends JPanel
     {
     	this.updater = u;
     	this.winner = NONE;
+    	setDisplay();
+    }
+    
+    private void setDisplay()
+    {
+    	
     	GridLayout mainLayout = new GridLayout(5, 1);
     	setLayout(mainLayout);
     	
@@ -229,7 +235,6 @@ public class Display extends JPanel
         buttonPanel.add(pawnPanel);
         add(buttonPanel);
     }
-    
     /**
      * Updating the winner state
      * @param winner the integer that represents a runner

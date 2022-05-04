@@ -127,8 +127,8 @@ public class Logic
         placePiece("a1", new Piece(Piece.Type.ROOK, Piece.Color.WHITE));
         placePiece("b1", new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE));
         placePiece("c1", new Piece(Piece.Type.BISHOP, Piece.Color.WHITE));
-        placePiece("d1", new Piece(Piece.Type.KING, Piece.Color.WHITE));
-        placePiece("e1", new Piece(Piece.Type.QUEEN, Piece.Color.WHITE));
+        placePiece("e1", new Piece(Piece.Type.KING, Piece.Color.WHITE));
+        placePiece("d1", new Piece(Piece.Type.QUEEN, Piece.Color.WHITE));
         placePiece("f1", new Piece(Piece.Type.BISHOP, Piece.Color.WHITE));
         placePiece("g1", new Piece(Piece.Type.KNIGHT, Piece.Color.WHITE));
         placePiece("h1", new Piece(Piece.Type.ROOK, Piece.Color.WHITE));
@@ -136,8 +136,8 @@ public class Logic
         placePiece("a8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
         placePiece("b8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
         placePiece("c8", new Piece(Piece.Type.BISHOP, Piece.Color.BLACK));
-        placePiece("d8", new Piece(Piece.Type.KING, Piece.Color.BLACK));
-        placePiece("e8", new Piece(Piece.Type.QUEEN, Piece.Color.BLACK));
+        placePiece("e8", new Piece(Piece.Type.KING, Piece.Color.BLACK));
+        placePiece("d8", new Piece(Piece.Type.QUEEN, Piece.Color.BLACK));
         placePiece("f8", new Piece(Piece.Type.BISHOP, Piece.Color.BLACK));
         placePiece("g8", new Piece(Piece.Type.KNIGHT, Piece.Color.BLACK));
         placePiece("h8", new Piece(Piece.Type.ROOK, Piece.Color.BLACK));
@@ -395,12 +395,12 @@ public class Logic
 		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('a'), color) == POSSIBLE)
 		{
 //			System.out.println(isSpotInDanger(row, Logic.convertToCol('b'), color));
-			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('b'), row), Integer.toString(Type.CASTLE.val)});
+			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('c'), row), Integer.toString(Type.CASTLE.val)});
 		}
 		
 		if (canMakeMove(Type.CASTLE, row, Logic.convertToCol('h'), color) == POSSIBLE)
 		{
-			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('f'), row), Integer.toString(Type.CASTLE.val)});
+			moves.add(new String[] {Logic.toCoordinates(Logic.convertToCol('g'), row), Integer.toString(Type.CASTLE.val)});
 		}
 		setPiece(col, row, null);
 		
@@ -806,6 +806,7 @@ public class Logic
         }
         Piece p;
         Piece friendly = (color.equals(Piece.Color.WHITE))? WHITE_PLACEHOLDER: BLACK_PLACEHOLDER;
+//        private Color oppColor
 		boolean kingInCheck = false;
 		int result = IMPOSSIBLE;
 		int change; ////////////////
@@ -827,8 +828,8 @@ public class Logic
 			case EN_PASSENT:
 				change = (color.equals(Piece.Color.BLACK))? 1: -1; ////////////////
 				p = getPiece(col, row + change);
-				System.out.println("Checking " + Logic.toCoordinates(col, row + change) + " for en passent" );
-				System.out.println((p == null)? "No pawn here": "Pawn is color " + p.getColor() + " and has made " + p.getMovesMade());
+//				System.out.println("Checking " + Logic.toCoordinates(col, row + change) + " for en passent" );
+//				System.out.println((p == null)? "No pawn here": "Pawn is color " + p.getColor() + " and has made " + p.getMovesMade());
                 if (p != null 
                     && !p.getColor().equals(color)
                     && p.getType().equals(Piece.Type.PAWN)
@@ -869,7 +870,7 @@ public class Logic
                     change = -1;
                 }
                 
-                int kingCol = convertToCol('d');
+                int kingCol = convertToCol('e');
                 Piece rook = getPiece(startCol, row);
                 Piece king = getPiece(kingCol, row);
 //                System.out.println(startCol + " , " + row);
@@ -887,17 +888,21 @@ public class Logic
                 	break;
                 }
                 
+//                System.out.println(startCol);
                 for (int i = startCol + change; i != kingCol; i += change)
                 {
                 	p = getPiece(i, row);
-                    if (p != null)
+//                	System.out.println(Logic.toCoordinates(startCol, row));
+//                	System.out.println(i +", " + change);
+//                	System.out.println(isSpotInDanger(row, startCol, color));
+                    if (p != null || isSpotInDanger(row, i, color).size() != 0)
                     {
                     	return IMPOSSIBLE;
                     }
                 }
                 result = POSSIBLE;
                 
-                int kingNewCol = (onLeftSide)? convertToCol('b'): convertToCol('f');
+                int kingNewCol = (onLeftSide)? convertToCol('c'): convertToCol('g');
                 int rookNewCol = kingNewCol + change;
                 
                 setPiece(kingCol, row, null);
@@ -929,6 +934,19 @@ public class Logic
         return isSpotInDanger(coord[0], coord[1], kingColor).size() != 0;
     }
     
+    /**
+     * Another check to see what pieces are attacking this square
+     * @param position the position
+     * @param color determines the color of the pieces returned (ex. if this is Piece.Color.WHITE, it will return all pieces that are of Piece.Color.BLACK)
+     * @return All pieces attacking this. 	  		
+     * 			Each entry is in the format in {row, col, type}
+     */
+    protected ArrayList<int[]> isSpotInDanger(String position, Piece.Color color)
+    {
+    	int[] positions = Logic.toCoordinates(position);
+		return isSpotInDanger(positions[0], positions[1], color);
+    }
+    
 	/**
 	 * Do a check to see if the specific spot can be attacked by any piece.
 	 * 
@@ -946,8 +964,9 @@ public class Logic
 	 *  			
 	 *  			Each entry is in the format in {row, col, type}
 	 */
-	private ArrayList<int[]> isSpotInDanger(int row, int col, Color color)
+	protected ArrayList<int[]> isSpotInDanger(int row, int col, Color color)
 	{
+//		System.out.println(Logic.toCoordinates(col, row));
 		ArrayList<int[]> attackingPieces = new ArrayList<>();
 		int[][] knightAttacks = new int[][]
 				{
@@ -1154,7 +1173,7 @@ public class Logic
 	 * @param r the character given
 	 * @return Its row index.
 	 */
-    private static int convertToRow(char r)
+    public static int convertToRow(char r)
     {
         return (int) (r - '1');
     }
@@ -1165,7 +1184,7 @@ public class Logic
      * @param c the character given
      * @return Its corresponding column index.
      */
-    private static int convertToCol(char c)
+    public static int convertToCol(char c)
     {
         return (int) (c - 'a');
     }
@@ -1204,7 +1223,7 @@ public class Logic
         Piece.Color currentColor = moving.getColor();
         moving.madeMove();
 
-    	
+    	System.out.println(initSpot + ", " + finalSpot + ", " + type);
         // Getting the capture coordinatse
     	int[] captureCoordinates = Logic.toCoordinates(finalSpot);
     	if (typeOfMove == Type.EN_PASSENT.val)
@@ -1240,9 +1259,9 @@ public class Logic
         {
         	int[] initialKingPos = Logic.toCoordinates(initSpot);
         	int[] finalKingPos = Logic.toCoordinates(finalSpot);
-        	boolean kingInFartherLocation = finalKingPos[1] > initialKingPos[1];
-        	String initialRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('h'): Logic.convertToCol('a'), initialKingPos[0]);
-        	String finalRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('e'): Logic.convertToCol('c'), initialKingPos[0]);
+        	boolean kingInFartherLocation = finalKingPos[1] < initialKingPos[1];
+        	String initialRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('a'): Logic.convertToCol('h'), initialKingPos[0]);
+        	String finalRookPos = Logic.toCoordinates((kingInFartherLocation)? Logic.convertToCol('d'): Logic.convertToCol('f'), initialKingPos[0]);
         	Piece rook = getPiece(initialRookPos);
         	rook.madeMove();
         	placePiece(finalRookPos, rook);
@@ -1256,4 +1275,76 @@ public class Logic
         return (attackerOfKing.size() == 0)? true: !inCheckmate(oppColor, attackerOfKing.get(0));
     }
     //////////
+
+    protected void setBoard(String positions)
+    {
+    	int row = 0;
+    	int col = 0;
+    	for (int i = 0; i < positions.length(); i++)
+    	{
+    		char letter = positions.charAt(i);
+    		while (letter != '/')
+    		{
+    			if (letter - '1' >= 0 
+    					&& '8' - letter >= 0 )
+    			{
+    				for (int j = 0; j < letter - '1' + 1; j++)
+    				{
+    					this.setPiece(col, row, null);
+    					col++;
+    				}
+    			}
+    			else 
+    			{
+    				boolean isLowerCase = Character.isLowerCase(letter);
+        			Piece.Type typeToMake = null;
+        			switch(Character.toUpperCase(letter))
+        			{
+        				case PAWN_CHAR:
+        					typeToMake = Piece.Type.PAWN;
+        					break;
+        				case BISHOP_CHAR:
+        					typeToMake = Piece.Type.BISHOP;
+        					break;
+        				case QUEEN_CHAR:
+        					typeToMake = Piece.Type.QUEEN;
+        					break;
+        				case KING_CHAR:
+        					typeToMake = Piece.Type.KING;
+        					break;
+        				case ROOK_CHAR:
+        					typeToMake = Piece.Type.ROOK;
+        					break;
+        				case KNIGHT_CHAR:
+        					typeToMake = Piece.Type.KNIGHT;
+        					break;
+        			}
+        			this.setPiece(col, row, new Piece(typeToMake, (isLowerCase)? Piece.Color.BLACK: Piece.Color.WHITE));
+        			col++;
+    			}
+    			i++;
+    			letter = positions.charAt(i);
+    		}
+    		col = 0;
+    		row++;
+    	}
+    }
+    
+	public static Piece.Type getType(char charAt) {
+		// TODO Auto-generated method stub
+		switch (charAt)
+		{
+			case Logic.BISHOP_CHAR:
+				return Piece.Type.BISHOP;
+			case Logic.KING_CHAR:
+				return Piece.Type.KING;
+			case Logic.KNIGHT_CHAR:
+				return Piece.Type.KNIGHT;
+			case Logic.QUEEN_CHAR:
+				return Piece.Type.QUEEN;
+			case Logic.ROOK_CHAR:
+				return Piece.Type.ROOK;
+		}
+		return null;
+	}
 }

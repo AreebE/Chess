@@ -2,13 +2,16 @@ package main;
 
 import chess2.Logic;
 import chess2.Piece;
+import fileLoader.GameReader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.io.FileNotFoundException;
 import java.lang.Runnable;
 import javax.swing.SwingUtilities;
 import graphics.EncompassingPanel;
+import graphics.FileEncompassingPanel;
 //import game
 class Main {
 	
@@ -31,10 +34,13 @@ class Main {
 		this.put(Piece.Type.QUEEN, new Integer[] {347, 104, 427, 184});
 		this.put(Piece.Type.PAWN, new Integer[] {527, 96, 607, 186});
 	}};
+	
   public static void main(String[] args) {
     System.out.println("Hello world!");
 //    debugLogic();
+    
     debugGraphics();
+//    debugFileLoader();
   }
   
   public static void debugLogic()
@@ -91,6 +97,21 @@ class Main {
 	  printMoves(l.getAllPossibilities("d4"));
 //	  System.out.println(l
 	  l.toString();
+  }
+  
+  public static void debugFileLoader()
+  {
+	  SwingUtilities.invokeLater(new Runnable()
+      {
+          @Override
+          public void run()
+          {
+              FileEncompassingPanel panel = new FileEncompassingPanel("res/test3", "res/cropped.png", whites, blacks);
+              panel.pack();
+//              panel.setSize.
+              panel.setVisible(true);
+          }
+      });
   }
   
   private static void printMoves(ArrayList<String[]> moves)

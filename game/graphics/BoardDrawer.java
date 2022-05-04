@@ -114,9 +114,9 @@ public class BoardDrawer extends JComponent
         int heightInterval = (height - 2 * margin) / NUM_INTERVALS;
         int widthInterval = (width - 2 * margin) / NUM_INTERVALS;
     	Font f = new Font(Font.MONOSPACED, Font.BOLD, widthInterval);
-
 //        System.out.println(margin * 2);
         Graphics2D betterGraphic = (Graphics2D) g;
+        System.out.println(g);
         betterGraphic.setFont(f);
         betterGraphic.setStroke(new BasicStroke(margin));
         betterGraphic.setColor(Color.BLACK);
