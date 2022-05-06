@@ -1,5 +1,5 @@
 # Chess
-A chess game that was made using Swing and programmed in just Java.
+A chess game that was made using Swing and programmed in just Java. To run it, download the code in some IDE like Eclipse, Replit, or IntelliJ. IF you want to play the game, in the main method in Main.java, make sure 'debugFileLoader' is commented out while uncommenting 'debugGraphics'
 
 ___
 # Controls:
@@ -89,3 +89,7 @@ The rules are the same as chess, with two exceptions:
     * The rook has not moved.
     * The king is currently not in check.
     * If any of the spaces are being attacked by one of the oppposing color.
+
+# Current bugs:
+* Cannot check for stalemate quite yet.
+* Currently working on a second mode where you can open a game. Please consider this feature unusable for now.
