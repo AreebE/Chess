@@ -39,8 +39,8 @@ class Main {
     System.out.println("Hello world!");
 //    debugLogic();
     
-    debugGraphics();
-//    debugFileLoader();
+//    debugGraphics();
+    debugFileLoader();
   }
   
   public static void debugLogic()
