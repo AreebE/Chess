@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -23,14 +25,36 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import fileLoader.GameReader;
 
+// Add the autotimer + notifier of who won.
 public class FileLoaderDisplay extends JPanel
 {
-	
+
 	private static final Color BLACK = new Color(0, 0, 0);
 	private static final Color WHITE = new Color(255, 255, 255);
 	private static final Color DARK_BLUE = new Color(15, 109, 163);
 	private static final Color LIGHT_BLUE = new Color(141, 204, 240);
 	
+	private class TimerTaskTemplate extends TimerTask
+	{
+
+		private Updater u;
+		public TimerTaskTemplate(Updater u)
+		{
+			this.u = u;
+		}
+		
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			u.advance();
+			if (list.getSelectedIndex() < listOfItems.size() - 1)
+			{
+				selectItem(list.getSelectedIndex() + 1);
+			}
+
+		}
+		
+	}
 	private class CellRenderer
 								extends JLabel
 								implements ListCellRenderer<String>
@@ -45,6 +69,7 @@ public class FileLoaderDisplay extends JPanel
 				boolean cellHasFocus) {
 			this.setText(value);
 			this.setOpaque(true);
+			
 			Font oldFont = getFont();
 			this.setFont(new Font(oldFont.getName(), oldFont.getStyle(), 20));
 			boolean isDark = index % 2 == 1;
@@ -96,6 +121,7 @@ public class FileLoaderDisplay extends JPanel
 		list.setModel(listOfItems);
 //		list.setSelectedIndex(0);
 		JButton button = new JButton();
+		button.setText("Advance");
 		button.addActionListener(new ActionListener()
 				{
 
@@ -116,6 +142,7 @@ public class FileLoaderDisplay extends JPanel
 		scroller.setViewportView(list);
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("PGN files (*.pgn)", "*.pgn");  
 		JButton fileOpener = new JButton();
+		fileOpener.setText("Choose File:");
 		fileChooser = new JFileChooser();
 		fileChooser.setFileFilter(filter);
 		fileOpener.addActionListener(new ActionListener()
@@ -134,11 +161,41 @@ public class FileLoaderDisplay extends JPanel
 			
 				}
 		);
+		
+		JButton autoAdvanceButton = new JButton();
+		autoAdvanceButton.setText("Auto advance:");
+	
+		boolean[] isAuto = new boolean[] {false};
+		autoAdvanceButton.addActionListener(new ActionListener() {
+			private Timer timer = new Timer();
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				isAuto[0] = !isAuto[0];
+//				System.out.println(timer);
+				if (isAuto[0])
+				{
+					timer.schedule(new TimerTaskTemplate(u), 0, 1000);
+				}
+				else 
+				{
+					timer.cancel();
+					timer = new Timer();
+				
+				}
+			}
+			
+		});
+		JPanel bottomRow = new JPanel();
+		bottomRow.setLayout(new GridLayout(1, 2));
+		bottomRow.add(autoAdvanceButton);
+		bottomRow.add(fileOpener);
 		this.add(scroller);
 		this.add(button);
-		this.add(fileOpener);
+		this.add(bottomRow);
 	}
 	
+
 	public void addItem(String newItem)
 	{
 		listOfItems.addElement(newItem);
