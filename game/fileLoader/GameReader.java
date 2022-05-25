@@ -109,14 +109,17 @@ public class GameReader extends Logic
 			{
 				continue;
 			}
-			System.out.print(move + " -- ");
+//			System.out.print(move + " -- ");
 			if (currentMoveIndex != 0)
 			{
-				System.out.println("before: " + this.toString() + ", " + this.toString().equals(moves.get(currentMoveIndex - 1)[BOARD_LAYOUT]));
+//				System.out.println("before: " + this.toString() + ", " + this.toString().equals(moves.get(currentMoveIndex - 1)[BOARD_LAYOUT]));
 			}
 //			System.out.println("\'" + move + "\'");
-			getTypeOfMove(move);
-			
+			String result = getTypeOfMove(move);
+			if (result != null)
+			{
+				move += result;
+			}
 			moves.add(new String[] {move, this.toString()});
 			isBlackTurn = !isBlackTurn;
 			currentMoveIndex++;
@@ -147,13 +150,13 @@ public class GameReader extends Logic
 	
 	public void advance()
 	{
-		if (currentMoveIndex < moves.size())
+		if (currentMoveIndex < moves.size() - 1)
 		{
 			setCurrentMove(currentMoveIndex + 1);
 		}
 	}
 	
-	public void getTypeOfMove(String move)
+	public String getTypeOfMove(String move)
 	{
 		System.out.println(move);
 		if (CHECK.matcher(move).find())
@@ -183,15 +186,15 @@ public class GameReader extends Logic
 		
 		else if (BLACK_WON.matcher(move).find())
 		{
-//			System.out.println("black won");
+			return " -- Black Won!";
 		}
 		else if (WHITE_WON.matcher(move).find())
 		{
-//			System.out.print("white won");
+			return " -- White won!";
 		}
 		else if(TIE.matcher(move).find())
 		{
-//			System.out.println("tie");
+			return " -- Stalemate.";
 		}
 		else if (SIMPLE_MOVEMENT_POSITION.matcher(move).find())
 		{
@@ -290,7 +293,7 @@ public class GameReader extends Logic
 					super.makeMove(start, pawnEndpoint, pawnMovements.get(i)[1], this);
 //					System.out.println("pawn captured a piece");
 
-					return;
+					return null;
 				}
 			}
 			// if there is an en passant:
@@ -332,7 +335,7 @@ public class GameReader extends Logic
 		}
 		
 		
-		
+		return null;
 	}
 	
 	public String getCurrentMove()
